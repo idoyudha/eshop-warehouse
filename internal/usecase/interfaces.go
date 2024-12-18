@@ -17,7 +17,7 @@ type (
 
 	WarehouseProductPostgreRepo interface {
 		Save(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error
-		// Update(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error // NOTE: update can be done via stock movement
+		UpdateProductQuantity(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error
 		GetAll(ctx context.Context) ([]*entity.WarehouseProduct, error)
 		GetByProductID(ctx context.Context, id uuid.UUID) (*entity.WarehouseProduct, error)
 		GetByWarehouseID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error)

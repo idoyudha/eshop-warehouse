@@ -44,6 +44,23 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 	return nil
 }
 
+const queryUpdateProductQuantity = `UPDATE warehouse_products SET product_quantity = $1, updated_at = $2 WHERE warehouse_id = $3;`
+
+func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateProductQuantity)
+	if errStmt != nil {
+		return errStmt
+	}
+	defer stmt.Close()
+
+	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductQuantity, warehouseProduct.UpdatedAt, warehouseProduct.WarehouseID)
+	if updateErr != nil {
+		return updateErr
+	}
+
+	return nil
+}
+
 const queryGetAllWarehouseProducts = `SELECT id, warehouse_id, product_id, product_name, product_quantity, description, created_at, updated_at FROM warehouse_products WHERE deleted_at IS NULL;`
 
 func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.WarehouseProduct, error) {
