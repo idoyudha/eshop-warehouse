@@ -9,6 +9,7 @@ type (
 		Log  `yaml:"log"`
 		PostgreSQL
 		AuthService
+		Redis
 	}
 
 	App struct {
@@ -33,6 +34,11 @@ type (
 
 	AuthService struct {
 		BaseURL string `env-required:"true" env:"AUTH_SERVICE"`
+	}
+
+	Redis struct {
+		RedisURL      string `env-required:"true" env:"REDIS_URL"`
+		RedisPassword string `env-required:"true" env:"REDIS_PASSWORD"`
 	}
 )
 
