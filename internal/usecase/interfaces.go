@@ -13,6 +13,7 @@ type (
 		Update(ctx context.Context, warehouse *entity.Warehouse) error
 		GetByID(ctx context.Context, id uuid.UUID) (*entity.Warehouse, error)
 		GetAll(ctx context.Context) ([]*entity.Warehouse, error)
+		GetAllExceptMain(ctx context.Context) ([]*entity.Warehouse, error)
 	}
 
 	WarehouseProductPostgreRepo interface {

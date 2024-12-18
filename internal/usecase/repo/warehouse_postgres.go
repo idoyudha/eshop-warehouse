@@ -18,7 +18,7 @@ func NewWarehousePostgreRepo(client *postgresql.Postgres) *WarehousePostgreRepo 
 	}
 }
 
-const queryInsertWarehouse = `INSERT INTO warehouse (id, name, street, city, state, zip_code, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+const queryInsertWarehouse = `INSERT INTO warehouse (id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 
 func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouse)
@@ -34,6 +34,7 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 		warehouse.City,
 		warehouse.State,
 		warehouse.ZipCode,
+		warehouse.IsMainWarehouse,
 		warehouse.CreatedAt,
 		warehouse.UpdatedAt,
 	)
@@ -61,7 +62,7 @@ func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.War
 	return nil
 }
 
-const queryGetByID = `SELECT id, name, street, city, state, zip_code, created_at, updated_at FROM warehouse WHERE id = $1 AND deleted_at IS NULL;`
+const queryGetByID = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE id = $1 AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.Warehouse, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetByID)
@@ -78,6 +79,7 @@ func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*enti
 		&warehouse.City,
 		&warehouse.State,
 		&warehouse.ZipCode,
+		&warehouse.IsMainWarehouse,
 		&warehouse.CreatedAt,
 		&warehouse.UpdatedAt,
 	)
@@ -88,7 +90,7 @@ func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*enti
 	return &warehouse, nil
 }
 
-const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, created_at, updated_at FROM warehouse WHERE deleted_at IS NULL;`
+const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouse)
@@ -113,6 +115,45 @@ func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse,
 			&warehouse.City,
 			&warehouse.State,
 			&warehouse.ZipCode,
+			&warehouse.IsMainWarehouse,
+			&warehouse.CreatedAt,
+			&warehouse.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		warehouses = append(warehouses, &warehouse)
+	}
+
+	return warehouses, nil
+}
+
+const queryGetAllExceptMainWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE is_main_warehouse = false AND deleted_at IS NULL;`
+
+func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.Warehouse, error) {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllExceptMainWarehouse)
+	if errStmt != nil {
+		return nil, errStmt
+	}
+	defer stmt.Close()
+
+	var warehouses []*entity.Warehouse
+	rows, err := stmt.QueryContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var warehouse entity.Warehouse
+		err := rows.Scan(
+			&warehouse.ID,
+			&warehouse.Name,
+			&warehouse.Street,
+			&warehouse.City,
+			&warehouse.State,
+			&warehouse.ZipCode,
+			&warehouse.IsMainWarehouse,
 			&warehouse.CreatedAt,
 			&warehouse.UpdatedAt,
 		)
