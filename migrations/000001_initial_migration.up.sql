@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS "warehouses" (
     "name" varchar NOT NULL,
     "street" varchar NOT NULL,
     "city" varchar NOT NULL,
-    "province" varchar NOT NULL,
+    "state" varchar NOT NULL,
     "zip_code" varchar NOT NULL,
     "created_at" timestamp NOT NULL,
     "updated_at" timestamp NOT NULL,
