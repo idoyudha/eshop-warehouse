@@ -43,7 +43,7 @@ type (
 		GetAllWarehouses(ctx context.Context) ([]*entity.Warehouse, error)
 	}
 
-	WarehouseProductInterface interface {
+	WarehouseProduct interface {
 		CreateWarehouseProduct(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error
 		UpdateWarehouseProduct(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error
 		GetAllWarehouseProducts(ctx context.Context) ([]*entity.WarehouseProduct, error)
@@ -52,7 +52,7 @@ type (
 		GetWarehouseProductByProductIDAndWarehouseID(ctx context.Context, productID uuid.UUID, warehouseID uuid.UUID) (*entity.WarehouseProduct, error)
 	}
 
-	StockMovementInterface interface {
+	StockMovement interface {
 		MoveIn(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
 		MoveOut(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
 		GetMovemenetByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
@@ -60,7 +60,7 @@ type (
 		GetMovementByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 	}
 
-	TransactionProductMovementInterface interface {
+	TransactionProductMovement interface {
 		MoveIn(context.Context, *entity.StockMovement) error
 		MoveOut(context.Context, []*entity.StockMovement) error
 	}
