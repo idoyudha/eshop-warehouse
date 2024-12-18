@@ -58,14 +58,13 @@ type (
 	}
 
 	StockMovement interface {
-		MoveIn(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
-		MoveOut(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
-		GetMovemenetByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
-		GetMovementBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
-		GetMovementByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetAllStockMovements(context.Context) ([]*entity.StockMovement, error)
+		GetMovementsByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetMovementsBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetMovementsByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 	}
 
-	TransactionProductMovement interface {
+	TransactionProduct interface {
 		MoveIn(context.Context, *entity.StockMovement) error
 		MoveOut(context.Context, []*entity.StockMovement) error
 	}
