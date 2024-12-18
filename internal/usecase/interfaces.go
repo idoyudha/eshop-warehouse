@@ -31,6 +31,11 @@ type (
 		GetByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 	}
 
+	TransactionProductPostgresRepo interface {
+		TransferIn(ctx context.Context, stockMovement *entity.StockMovement, warehouseProduct *entity.WarehouseProduct) error
+		TransferOut(ctx context.Context, stockMovement []*entity.StockMovement, warehouseProduct *entity.WarehouseProduct) error
+	}
+
 	Warehouse interface {
 		CreateWarehouse(ctx context.Context, warehouse *entity.Warehouse) error
 		UpdateWarehouse(ctx context.Context, warehouse *entity.Warehouse) error
@@ -53,5 +58,10 @@ type (
 		GetMovemenetByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 		GetMovementBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 		GetMovementByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+	}
+
+	TransactionProductMovementInterface interface {
+		MoveIn(context.Context, *entity.StockMovement) error
+		MoveOut(context.Context, []*entity.StockMovement) error
 	}
 )
