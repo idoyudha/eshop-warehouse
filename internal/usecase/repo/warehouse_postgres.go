@@ -88,10 +88,10 @@ func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*enti
 	return &warehouse, nil
 }
 
-const queryGetAll = `SELECT id, name, street, city, state, zip_code, created_at, updated_at FROM warehouse WHERE deleted_at IS NULL;`
+const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, created_at, updated_at FROM warehouse WHERE deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAll)
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouse)
 	if errStmt != nil {
 		return nil, errStmt
 	}

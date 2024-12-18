@@ -25,8 +25,7 @@ type (
 	}
 
 	StockMovementPostgreRepo interface {
-		TransferIn(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
-		TrasnferOut(context.Context, uuid.UUID, uuid.UUID, *entity.WarehouseProduct) error
+		GetAll(ctx context.Context) ([]*entity.StockMovement, error)
 		GetByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 		GetBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 		GetByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)

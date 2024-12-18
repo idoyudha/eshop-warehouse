@@ -13,6 +13,6 @@ type StockMovement struct {
 	Quantity        int64     `json:"quantity"`
 	FromWarehouseID uuid.UUID `json:"from_warehouse_id"`
 	ToWarehouseID   uuid.UUID `json:"to_warehouse_id"`
-	ToUserID        uuid.UUID `json:"to_user_id"` // for moving out to user
+	ToUserID        uuid.UUID `json:"to_user_id"` // for moving out to user (DELIVERED)
 	CreatedAt       time.Time `json:"created_at"`
 }
