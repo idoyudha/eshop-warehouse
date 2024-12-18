@@ -67,7 +67,7 @@ const (
 			updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 
-	queryInsertMovement = `
+	queryInsertWarehouseMovement = `
 		INSERT INTO stock_movements (
 			id, 
 			product_id, 
@@ -144,7 +144,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	}
 
 	// 5. insert stock movement
-	_, err = tx.ExecContext(ctx, queryInsertMovement,
+	_, err = tx.ExecContext(ctx, queryInsertWarehouseMovement,
 		stockMovement.ID,
 		stockMovement.ProductID,
 		stockMovement.ProductName,
@@ -165,7 +165,64 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	return nil
 }
 
+const queryInsertUserMovement = `
+	INSERT INTO stock_movements (
+		id, 
+		product_id, 
+		product_name, 
+		quantity, 
+		from_warehouse_id, 
+		to_user_id,
+		created_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+
 // handling transfer from warehouse to user
-func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockMovement []*entity.StockMovement, warehouseProduct *entity.WarehouseProduct) error {
+// if one warehouse is not enough products, then take it from another warehouse
+// it will be multiple stock movement transactions
+func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockMovement []*entity.StockMovement) error {
+	// begin transaction
+	tx, err := r.Conn.BeginTx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	for _, movement := range stockMovement {
+		// 1. lock source product row
+		if err = tx.QueryRowContext(ctx, queryLockSourceProduct,
+			movement.ProductID, movement.FromWarehouseID,
+		).Scan(&struct{}{}); err != nil {
+			return fmt.Errorf("failed to lock source product: %w", err)
+		}
+
+		// 2. update source quantity
+		_, err = tx.ExecContext(ctx, queryUpdateSourceQuantity,
+			movement.Quantity, movement.CreatedAt, movement.ProductID, movement.FromWarehouseID)
+		if err != nil {
+			return fmt.Errorf("failed to update source quantity: %w", err)
+		}
+
+		// 3. insert stock movement
+		_, err = tx.ExecContext(ctx, queryInsertUserMovement,
+			movement.ID,
+			movement.ProductID,
+			movement.ProductName,
+			movement.Quantity,
+			movement.FromWarehouseID,
+			movement.ToUserID,
+			movement.CreatedAt,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to insert stock movement: %w", err)
+		}
+	}
+
+	// commit transaction
+	if errCommit := tx.Commit(); errCommit != nil {
+		return fmt.Errorf("failed to commit transaction: %w", errCommit)
+	}
+
 	return nil
 }
