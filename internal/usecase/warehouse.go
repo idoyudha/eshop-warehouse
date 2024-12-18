@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 	"github.com/idoyudha/eshop-warehouse/internal/utils"
 )
@@ -88,4 +89,16 @@ func (u *WarehouseUseCase) CreateWarehouse(ctx context.Context, warehouse *entit
 		}
 	}
 	return nil
+}
+
+func (u *WarehouseUseCase) UpdateWarehouse(ctx context.Context, warehouse *entity.Warehouse) error {
+	return u.repoPostgre.Update(ctx, warehouse)
+}
+
+func (u *WarehouseUseCase) GetWarehouseByID(ctx context.Context, id uuid.UUID) (*entity.Warehouse, error) {
+	return u.repoPostgre.GetByID(ctx, id)
+}
+
+func (u *WarehouseUseCase) GetAllWarehouses(ctx context.Context) ([]*entity.Warehouse, error) {
+	return u.repoPostgre.GetAll(ctx)
 }

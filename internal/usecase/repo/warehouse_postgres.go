@@ -45,7 +45,7 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 	return nil
 }
 
-const queryUpdateWarehouse = `UPDATE warehouse SET name = $1, street = $2, city = $3, state = $4, zip_code = $5, updated_at = $6 WHERE id = $7;`
+const queryUpdateWarehouse = `UPDATE warehouse SET name = $1, street = $2, updated_at = $6 WHERE id = $7;`
 
 func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateWarehouse)
@@ -54,7 +54,7 @@ func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.War
 	}
 	defer stmt.Close()
 
-	_, updateErr := stmt.ExecContext(ctx, warehouse.Name, warehouse.Street, warehouse.City, warehouse.State, warehouse.ZipCode, warehouse.UpdatedAt, warehouse.ID)
+	_, updateErr := stmt.ExecContext(ctx, warehouse.Name, warehouse.Street, warehouse.UpdatedAt, warehouse.ID)
 	if updateErr != nil {
 		return updateErr
 	}
