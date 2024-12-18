@@ -100,56 +100,76 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 
 const queryGetWarehouseProductByProductID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, description, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND deleted_at IS NULL;`
 
-func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uuid.UUID) (*entity.WarehouseProduct, error) {
+func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductID)
 	if errStmt != nil {
 		return nil, errStmt
 	}
 	defer stmt.Close()
 
-	var warehouseProduct entity.WarehouseProduct
-	err := stmt.QueryRowContext(ctx, id).Scan(
-		&warehouseProduct.ID,
-		&warehouseProduct.WarehouseID,
-		&warehouseProduct.ProductID,
-		&warehouseProduct.ProductName,
-		&warehouseProduct.ProductQuantity,
-		&warehouseProduct.Description,
-		&warehouseProduct.CreatedAt,
-		&warehouseProduct.UpdatedAt,
-	)
+	var warehouseProducts []*entity.WarehouseProduct
+	rows, err := stmt.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	return &warehouseProduct, nil
+	for rows.Next() {
+		var warehouseProduct entity.WarehouseProduct
+		err := rows.Scan(
+			&warehouseProduct.ID,
+			&warehouseProduct.WarehouseID,
+			&warehouseProduct.ProductID,
+			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductQuantity,
+			&warehouseProduct.Description,
+			&warehouseProduct.CreatedAt,
+			&warehouseProduct.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		warehouseProducts = append(warehouseProducts, &warehouseProduct)
+	}
+
+	return warehouseProducts, nil
 }
 
 const queryGetWarehouseProductByWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, description, created_at, updated_at FROM warehouse_products WHERE warehouse_id = $1 AND deleted_at IS NULL;`
 
-func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id uuid.UUID) (*entity.WarehouseProduct, error) {
+func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByWarehouseID)
 	if errStmt != nil {
 		return nil, errStmt
 	}
 	defer stmt.Close()
 
-	var warehouseProduct entity.WarehouseProduct
-	err := stmt.QueryRowContext(ctx, id).Scan(
-		&warehouseProduct.ID,
-		&warehouseProduct.WarehouseID,
-		&warehouseProduct.ProductID,
-		&warehouseProduct.ProductName,
-		&warehouseProduct.ProductQuantity,
-		&warehouseProduct.Description,
-		&warehouseProduct.CreatedAt,
-		&warehouseProduct.UpdatedAt,
-	)
+	var warehouseProducts []*entity.WarehouseProduct
+	rows, err := stmt.QueryContext(ctx)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
-	return &warehouseProduct, nil
+	for rows.Next() {
+		var warehouseProduct entity.WarehouseProduct
+		err := rows.Scan(
+			&warehouseProduct.ID,
+			&warehouseProduct.WarehouseID,
+			&warehouseProduct.ProductID,
+			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductQuantity,
+			&warehouseProduct.Description,
+			&warehouseProduct.CreatedAt,
+			&warehouseProduct.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		warehouseProducts = append(warehouseProducts, &warehouseProduct)
+	}
+
+	return warehouseProducts, nil
 }
 
 const queryGetWarehouseProductByProductIDAndWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, description, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND warehouse_id = $2 AND deleted_at IS NULL;`
