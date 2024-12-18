@@ -27,7 +27,16 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 	}
 	defer stmt.Close()
 
-	_, saveErr := stmt.ExecContext(ctx, warehouse.ID, warehouse.Name, warehouse.Street, warehouse.City, warehouse.State, warehouse.ZipCode, warehouse.CreatedAt, warehouse.UpdatedAt)
+	_, saveErr := stmt.ExecContext(ctx,
+		warehouse.ID,
+		warehouse.Name,
+		warehouse.Street,
+		warehouse.City,
+		warehouse.State,
+		warehouse.ZipCode,
+		warehouse.CreatedAt,
+		warehouse.UpdatedAt,
+	)
 	if saveErr != nil {
 		return saveErr
 	}
