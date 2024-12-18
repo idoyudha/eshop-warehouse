@@ -1,2 +1,2 @@
 INSERT INTO warehouses (id, name, street, city, state, zip_code, created_at, updated_at) VALUES
-('0193d7b4-a3d7-7022-a547-b987b1f9c6a8', 'Main Warehouse', 'Jl. Raya Jakarta', 'Jakarta Selatan', 'DKI Jakarta', '10250', now(), now());
+('0193d7b4-a3d7-7022-a547-b987b1f9c6a8', 'Main Warehouse', 'Jl. Raya Jakarta', 'Jakarta Selatan', 'DKI Jakarta', '10250', true, now(), now());

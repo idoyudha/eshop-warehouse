@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "warehouses" (
     "city" varchar NOT NULL,
     "state" varchar NOT NULL,
     "zip_code" varchar NOT NULL,
+    "is_main_warehouse" boolean NOT NULL,
     "created_at" timestamp NOT NULL,
     "updated_at" timestamp NOT NULL,
     "deleted_at" timestamp
@@ -32,6 +33,8 @@ CREATE TABLE IF NOT EXISTS "stock_movement" (
     "to_user_id" uuid,
     "created_at" timestamp NOT NULL
 );
+
+CREATE INDEX `warehouse_is_main_warehouse_idx` ON `warehouses` (`is_main_warehouse`);
 
 CREATE INDEX `warehouse_products_product_id_idx` ON `warehouse_products` (`product_id`);
 CREATE INDEX `warehouse_products_warehouse_id_idx` ON `warehouse_products` (`warehouse_id`);
