@@ -21,6 +21,7 @@ func (u *WarehouseProductUseCase) CreateWarehouseProduct(ctx context.Context, wa
 	return u.repoPostgre.Save(ctx, warehouseProduct)
 }
 
+// TODO: need to handle stock movement also if quantity is updated
 func (u *WarehouseProductUseCase) UpdateWarehouseProductQuantity(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
 	return u.repoPostgre.UpdateProductQuantity(ctx, warehouseProduct)
 }
