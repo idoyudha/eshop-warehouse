@@ -34,12 +34,12 @@ CREATE TABLE IF NOT EXISTS "stock_movement" (
     "created_at" timestamp NOT NULL
 );
 
-CREATE INDEX `warehouse_is_main_warehouse_idx` ON `warehouses` (`is_main_warehouse`);
+CREATE INDEX warehouse_is_main_warehouse_idx ON warehouses (is_main_warehouse);
 
-CREATE INDEX `warehouse_products_product_id_idx` ON `warehouse_products` (`product_id`);
-CREATE INDEX `warehouse_products_warehouse_id_idx` ON `warehouse_products` (`warehouse_id`);
+CREATE INDEX warehouse_products_product_id_idx ON warehouse_products (product_id);
+CREATE INDEX warehouse_products_warehouse_id_idx ON warehouse_products (warehouse_id);
 
-ALTER TABLE `warehouse_products` ADD FOREIGN KEY (`warehouse_id`) REFERENCES `warehouses` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE warehouse_products ADD FOREIGN KEY (warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE `stock_movement` ADD FOREIGN KEY (`from_warehouse_id`) REFERENCES `warehouses` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
-ALTER TABLE `stock_movement` ADD FOREIGN KEY (`to_warehouse_id`) REFERENCES `warehouses` (`id`) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE stock_movement ADD FOREIGN KEY (from_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE stock_movement ADD FOREIGN KEY (to_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;

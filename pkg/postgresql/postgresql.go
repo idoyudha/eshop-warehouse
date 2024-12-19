@@ -2,7 +2,6 @@ package postgresql
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -22,9 +21,7 @@ type Postgres struct {
 }
 
 func NewPostgres(cfg config.PostgreSQL) (*Postgres, error) {
-	connStr := fmt.Sprintf("%s://%s", _defaultDriver, cfg.URL)
-
-	client, err := sql.Open(_defaultDriver, connStr)
+	client, err := sql.Open(_defaultDriver, cfg.URL)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
