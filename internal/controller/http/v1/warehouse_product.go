@@ -40,14 +40,14 @@ func (r *warehouseProductRoutes) getAllWarehouseProducts(ctx *gin.Context) {
 func (r *warehouseProductRoutes) getWarehouseProductByProductID(ctx *gin.Context) {
 	productID, err := uuid.Parse(ctx.Param("product_id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductID")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
 	products, err := r.uc.GetWarehouseProductByProductID(ctx.Request.Context(), productID)
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - getWarehouseByID")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
 		return
 	}
@@ -58,14 +58,14 @@ func (r *warehouseProductRoutes) getWarehouseProductByProductID(ctx *gin.Context
 func (r *warehouseProductRoutes) getWarehouseProductByWarehouseID(ctx *gin.Context) {
 	warehouseID, err := uuid.Parse(ctx.Param("warehouse_id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByWarehouseID")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
 	products, err := r.uc.GetWarehouseProductByWarehouseID(ctx.Request.Context(), warehouseID)
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - getWarehouseByID")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByWarehouseID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
 		return
 	}
@@ -76,21 +76,21 @@ func (r *warehouseProductRoutes) getWarehouseProductByWarehouseID(ctx *gin.Conte
 func (r *warehouseProductRoutes) getWarehouseProductByProductIDAndWarehouseID(ctx *gin.Context) {
 	productID, err := uuid.Parse(ctx.Param("product_id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductIDAndWarehouseID")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
 	warehouseID, err := uuid.Parse(ctx.Param("warehouse_id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductIDAndWarehouseID")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
 	products, err := r.uc.GetWarehouseProductByProductIDAndWarehouseID(ctx.Request.Context(), productID, warehouseID)
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - getWarehouseByID")
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductIDAndWarehouseID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
 		return
 	}

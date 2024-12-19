@@ -67,7 +67,7 @@ type UpdateWarehouseRequest struct {
 func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
 	warehouseID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseRoutes - updateWarehouse")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
@@ -99,7 +99,7 @@ func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
 func (r *warehouseRoutes) getWarehouseByID(ctx *gin.Context) {
 	warehouseID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateCart")
+		r.l.Error(err, "http - v1 - warehouseRoutes - getWarehouseByID")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}

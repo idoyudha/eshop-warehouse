@@ -59,9 +59,9 @@ type (
 
 	StockMovement interface {
 		GetAllStockMovements(context.Context) ([]*entity.StockMovement, error)
-		GetMovementsByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
-		GetMovementsBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
-		GetMovementsByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetStockMovementsByProductID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetStockMovementsBySourceID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
+		GetStockMovementsByDestinationID(context.Context, uuid.UUID) ([]*entity.StockMovement, error)
 	}
 
 	TransactionProduct interface {
