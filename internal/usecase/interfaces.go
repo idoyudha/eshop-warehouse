@@ -39,7 +39,7 @@ type (
 	}
 
 	TransactionProductPostgresRepo interface {
-		TransferIn(context.Context, *entity.StockMovement, *entity.WarehouseProduct) error
+		TransferIn(context.Context, *entity.StockMovement) error
 		TransferOut(context.Context, []*entity.StockMovement) error
 	}
 

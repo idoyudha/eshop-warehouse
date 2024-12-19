@@ -103,6 +103,6 @@ func (u *WarehouseUseCase) GetAllWarehouses(ctx context.Context) ([]*entity.Ware
 	return u.repoPostgre.GetAll(ctx)
 }
 
-func (u *WarehouseUseCase) GetMainWarehouse(ctx context.Context) (uuid.UUID, error) {
+func (u *WarehouseUseCase) GetMainIDWarehouse(ctx context.Context) (uuid.UUID, error) {
 	return u.repoPostgre.GetMainID(ctx)
 }

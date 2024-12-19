@@ -10,6 +10,7 @@ type (
 		PostgreSQL
 		AuthService
 		Redis
+		Kafka
 	}
 
 	App struct {
@@ -39,6 +40,10 @@ type (
 	Redis struct {
 		RedisURL      string `env-required:"true" env:"REDIS_URL"`
 		RedisPassword string `env-required:"true" env:"REDIS_PASSWORD"`
+	}
+
+	Kafka struct {
+		Broker string `env-required:"true" env:"KAFKA_BROKER"`
 	}
 )
 

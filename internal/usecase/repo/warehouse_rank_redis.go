@@ -16,7 +16,7 @@ type WarehouseRankRedisRepo struct {
 	*rClient.RedisClient
 }
 
-func NewCartRedisRepo(client *rClient.RedisClient) *WarehouseRankRedisRepo {
+func NewWarehouseRankRedisRepo(client *rClient.RedisClient) *WarehouseRankRedisRepo {
 	return &WarehouseRankRedisRepo{
 		client,
 	}

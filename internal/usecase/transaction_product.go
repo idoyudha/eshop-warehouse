@@ -23,7 +23,7 @@ func NewTransactionProductUseCase(repoRedis WarehouseRankRedisRepo, repoTransact
 	}
 }
 
-func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *entity.StockMovement, product *entity.WarehouseProduct) error {
+func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *entity.StockMovement) error {
 	warehouseProduct, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, stockMovement.FromWarehouseID)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *e
 		return fmt.Errorf("warehouse product quantity is not enough")
 	}
 
-	return u.repoTransactionPostgre.TransferIn(ctx, stockMovement, product)
+	return u.repoTransactionPostgre.TransferIn(ctx, stockMovement)
 }
 
 // move from warehouse to user
