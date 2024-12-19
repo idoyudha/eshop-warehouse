@@ -61,8 +61,7 @@ const (
 			warehouse_id, 
 			product_id, 
 			product_name, 
-			product_quantity, 
-			description, 
+			product_quantity,
 			created_at, 
 			updated_at
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
@@ -80,7 +79,7 @@ const (
 )
 
 // handling transfer from warehouse to warehouse
-func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMovement *entity.StockMovement, warehouseProduct *entity.WarehouseProduct) error {
+func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMovement *entity.StockMovement) error {
 	// begin transaction
 	tx, err := r.Conn.BeginTx(ctx, &sql.TxOptions{
 		Isolation: sql.LevelReadCommitted,
@@ -131,10 +130,9 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 		_, err = tx.ExecContext(ctx, queryInsertDestProduct,
 			newID,
 			stockMovement.ToWarehouseID,
-			warehouseProduct.ProductID,
-			warehouseProduct.ProductName,
+			stockMovement.ProductID,
+			stockMovement.ProductName,
 			stockMovement.Quantity,
-			warehouseProduct.Description,
 			stockMovement.CreatedAt,
 			stockMovement.CreatedAt,
 		)

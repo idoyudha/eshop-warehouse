@@ -14,7 +14,12 @@ type warehouseProductRoutes struct {
 	l  logger.Interface
 }
 
-func newWarehouseProductRoutes(handler *gin.RouterGroup, uc usecase.WarehouseProduct, l logger.Interface, authMid gin.HandlerFunc) {
+func newWarehouseProductRoutes(
+	handler *gin.RouterGroup,
+	uc usecase.WarehouseProduct,
+	l logger.Interface,
+	authMid gin.HandlerFunc,
+) {
 	r := &warehouseProductRoutes{uc: uc, l: l}
 
 	h := handler.Group("/warehouse-product").Use(authMid)

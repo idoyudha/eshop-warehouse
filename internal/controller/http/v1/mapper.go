@@ -33,3 +33,25 @@ func UpdateWarehouseRequestToWarehouseEntity(req UpdateWarehouseRequest, warehou
 		UpdatedAt: time.Now(),
 	}, nil
 }
+
+func CreateStockMovementInRequestToStockMovementEntity(req CreateStockMovementIn) (entity.StockMovement, error) {
+	return entity.StockMovement{
+		ProductID:       req.ProductID,
+		ProductName:     req.ProductName,
+		Quantity:        req.Quantity,
+		FromWarehouseID: req.FromWarehouseID,
+		ToWarehouseID:   req.ToWarehouseID,
+		CreatedAt:       time.Now(),
+	}, nil
+}
+
+func CreateStockMovementOutRequestToStockMovementEntity(req CreateStockMovementOut) (entity.StockMovement, error) {
+	return entity.StockMovement{
+		ProductID:       req.ProductID,
+		ProductName:     req.ProductName,
+		Quantity:        req.Quantity,
+		FromWarehouseID: req.FromWarehouseID,
+		ToUserID:        req.ToUserID,
+		CreatedAt:       time.Now(),
+	}, nil
+}

@@ -10,15 +10,28 @@ import (
 )
 
 type stockMovementRoutes struct {
-	uc usecase.StockMovement
-	l  logger.Interface
+	ucs usecase.StockMovement
+	uct usecase.TransactionProduct
+	l   logger.Interface
 }
 
-func newStockMovementRoutes(handler *gin.RouterGroup, uc usecase.StockMovement, l logger.Interface, authMid gin.HandlerFunc) {
-	r := &stockMovementRoutes{uc: uc, l: l}
+func newStockMovementRoutes(
+	handler *gin.RouterGroup,
+	ucs usecase.StockMovement,
+	uct usecase.TransactionProduct,
+	l logger.Interface,
+	authMid gin.HandlerFunc,
+) {
+	r := &stockMovementRoutes{
+		ucs: ucs,
+		uct: uct,
+		l:   l,
+	}
 
 	h := handler.Group("/stock-movement").Use(authMid)
 	{
+		h.POST("/movein", r.createStockMovementIn)
+		h.POST("/moveout", r.createStockMovementOut)
 		h.GET("", r.getAllStockMovements)
 		h.GET("/product/:product_id", r.getStockMovementByProductID)
 		h.GET("/source/:source_id", r.getStockMovementBySourceID)
@@ -26,8 +39,74 @@ func newStockMovementRoutes(handler *gin.RouterGroup, uc usecase.StockMovement, 
 	}
 }
 
+type CreateStockMovementIn struct {
+	ProductID       uuid.UUID `json:"product_id"`
+	ProductName     string    `json:"product_name"`
+	Quantity        int64     `json:"quantity"`
+	FromWarehouseID uuid.UUID `json:"from_warehouse_id"`
+	ToWarehouseID   uuid.UUID `json:"to_warehouse_id"`
+}
+
+func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
+	var req CreateStockMovementIn
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
+		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
+		return
+	}
+
+	stockMovement, err := CreateStockMovementInRequestToStockMovementEntity(req)
+	if err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	err = r.uct.MoveIn(ctx.Request.Context(), &stockMovement)
+	if err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, newCreateSuccess(stockMovement))
+}
+
+type CreateStockMovementOut struct {
+	ProductID       uuid.UUID `json:"product_id"`
+	ProductName     string    `json:"product_name"`
+	Quantity        int64     `json:"quantity"`
+	FromWarehouseID uuid.UUID `json:"from_warehouse_id"`
+	ToUserID        uuid.UUID `json:"to_user_id"`
+}
+
+func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
+	var req CreateStockMovementOut
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
+		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
+		return
+	}
+
+	stockMovement, err := CreateStockMovementOutRequestToStockMovementEntity(req)
+	if err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	err = r.uct.MoveOut(ctx.Request.Context(), &stockMovement)
+	if err != nil {
+		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, newCreateSuccess(stockMovement))
+}
+
 func (r *stockMovementRoutes) getAllStockMovements(ctx *gin.Context) {
-	stockMovements, err := r.uc.GetAllStockMovements(ctx.Request.Context())
+	stockMovements, err := r.ucs.GetAllStockMovements(ctx.Request.Context())
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getAllStockMovements")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -45,7 +124,7 @@ func (r *stockMovementRoutes) getStockMovementByProductID(ctx *gin.Context) {
 		return
 	}
 
-	stockMovements, err := r.uc.GetStockMovementsByProductID(ctx.Request.Context(), productID)
+	stockMovements, err := r.ucs.GetStockMovementsByProductID(ctx.Request.Context(), productID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementByProductID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -63,7 +142,7 @@ func (r *stockMovementRoutes) getStockMovementBySourceID(ctx *gin.Context) {
 		return
 	}
 
-	stockMovements, err := r.uc.GetStockMovementsBySourceID(ctx.Request.Context(), sourceID)
+	stockMovements, err := r.ucs.GetStockMovementsBySourceID(ctx.Request.Context(), sourceID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementBySourceID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -81,7 +160,7 @@ func (r *stockMovementRoutes) getStockMovementByDestinationID(ctx *gin.Context) 
 		return
 	}
 
-	stockMovements, err := r.uc.GetStockMovementsByDestinationID(ctx.Request.Context(), destinationID)
+	stockMovements, err := r.ucs.GetStockMovementsByDestinationID(ctx.Request.Context(), destinationID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementByDestinationID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))

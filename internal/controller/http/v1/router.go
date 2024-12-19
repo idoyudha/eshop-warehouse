@@ -14,6 +14,7 @@ func NewRouter(
 	ucw usecase.Warehouse,
 	ucwp usecase.WarehouseProduct,
 	ucsm usecase.StockMovement,
+	uct usecase.TransactionProduct,
 	l logger.Interface,
 	auth config.AuthService,
 ) {
@@ -27,6 +28,6 @@ func NewRouter(
 	{
 		newWarehouseRoutes(h, ucw, l, authMid)
 		newWarehouseProductRoutes(h, ucwp, l, authMid)
-		newStockMovementRoutes(h, ucsm, l, authMid)
+		newStockMovementRoutes(h, ucsm, uct, l, authMid)
 	}
 }
