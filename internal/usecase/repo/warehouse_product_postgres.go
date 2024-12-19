@@ -18,7 +18,7 @@ func NewWarehouseProductPostgreRepo(client *postgresql.Postgres) *WarehouseProdu
 	}
 }
 
-const queryInsertWarehouseProduct = `INSERT INTO warehouse_products (id, warehouse_id, product_id, product_name, product_quantity, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7);`
+const queryInsertWarehouseProduct = `INSERT INTO warehouse_products (id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 
 func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouseProduct)
@@ -32,6 +32,7 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 		warehouseProduct.WarehouseID,
 		warehouseProduct.ProductID,
 		warehouseProduct.ProductName,
+		warehouseProduct.ProductPrice,
 		warehouseProduct.ProductQuantity,
 		warehouseProduct.CreatedAt,
 		warehouseProduct.UpdatedAt,
@@ -60,7 +61,7 @@ func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context,
 	return nil
 }
 
-const queryGetAllWarehouseProducts = `SELECT id, warehouse_id, product_id, product_name, product_quantity, created_at, updated_at FROM warehouse_products WHERE deleted_at IS NULL;`
+const queryGetAllWarehouseProducts = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE deleted_at IS NULL;`
 
 func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouseProducts)
@@ -83,6 +84,7 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
@@ -96,7 +98,7 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByProductID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByProductID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND deleted_at IS NULL;`
 
 func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductID)
@@ -119,6 +121,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
@@ -132,7 +135,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, created_at, updated_at FROM warehouse_products WHERE warehouse_id = $1 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE warehouse_id = $1 AND deleted_at IS NULL;`
 
 func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByWarehouseID)
@@ -155,6 +158,7 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
@@ -168,7 +172,7 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByProductIDAndWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND warehouse_id = $2 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByProductIDAndWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND warehouse_id = $2 AND deleted_at IS NULL;`
 
 func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.Context, productID uuid.UUID, warehouseID uuid.UUID) (*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductIDAndWarehouseID)
@@ -183,6 +187,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 		&warehouseProduct.WarehouseID,
 		&warehouseProduct.ProductID,
 		&warehouseProduct.ProductName,
+		&warehouseProduct.ProductPrice,
 		&warehouseProduct.ProductQuantity,
 		&warehouseProduct.CreatedAt,
 		&warehouseProduct.UpdatedAt,

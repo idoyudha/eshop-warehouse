@@ -11,6 +11,7 @@ type WarehouseProduct struct {
 	WarehouseID     uuid.UUID `json:"warehouse_id"`
 	ProductID       uuid.UUID `json:"product_id"`
 	ProductName     string    `json:"product_name"`
+	ProductPrice    float64   `json:"product_price"`
 	ProductQuantity int64     `json:"product_quantity"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
