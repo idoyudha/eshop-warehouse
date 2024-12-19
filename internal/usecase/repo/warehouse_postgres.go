@@ -45,7 +45,7 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 	return nil
 }
 
-const queryUpdateWarehouse = `UPDATE warehouse SET name = $1, street = $2, updated_at = $6 WHERE id = $7;`
+const queryUpdateWarehouse = `UPDATE warehouse SET name = $1, street = $2, updated_at = $3 WHERE id = $4;`
 
 func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateWarehouse)

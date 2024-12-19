@@ -64,6 +64,7 @@ func cognitoMiddleware(auth config.AuthService) gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		// TODO: filter based on roles
 
 		ctx.Set(UserIDKey, authSuccessResponse.Data.UserID)
 		ctx.Next()
