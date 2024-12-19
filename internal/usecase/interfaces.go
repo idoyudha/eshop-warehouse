@@ -18,10 +18,12 @@ type (
 		GetByID(context.Context, uuid.UUID) (*entity.Warehouse, error)
 		GetAll(context.Context) ([]*entity.Warehouse, error)
 		GetAllExceptMain(context.Context) ([]*entity.Warehouse, error)
+		GetMainID(context.Context) (uuid.UUID, error)
 	}
 
 	WarehouseProductPostgreRepo interface {
 		Save(context.Context, *entity.WarehouseProduct) error
+		UpdateNameAndPrice(context.Context, *entity.WarehouseProduct) error
 		UpdateProductQuantity(context.Context, *entity.WarehouseProduct) error
 		GetAll(context.Context) ([]*entity.WarehouseProduct, error)
 		GetByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
@@ -46,10 +48,12 @@ type (
 		UpdateWarehouse(context.Context, *entity.Warehouse) error
 		GetWarehouseByID(context.Context, uuid.UUID) (*entity.Warehouse, error)
 		GetAllWarehouses(context.Context) ([]*entity.Warehouse, error)
+		GetMainIDWarehouse(context.Context) (uuid.UUID, error)
 	}
 
 	WarehouseProduct interface {
 		CreateWarehouseProduct(context.Context, *entity.WarehouseProduct) error
+		UpdateWarehouseProductNameAndPrice(context.Context, *entity.WarehouseProduct) error
 		UpdateWarehouseProductQuantity(context.Context, *entity.WarehouseProduct) error
 		GetAllWarehouseProducts(context.Context) ([]*entity.WarehouseProduct, error)
 		GetWarehouseProductByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)

@@ -165,3 +165,21 @@ func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.
 
 	return warehouses, nil
 }
+
+const queryGetMainIDWarehouse = `SELECT id FROM warehouse WHERE is_main_warehouse = true AND deleted_at IS NULL;`
+
+func (r *WarehousePostgreRepo) GetMainID(ctx context.Context) (uuid.UUID, error) {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetMainIDWarehouse)
+	if errStmt != nil {
+		return uuid.Nil, errStmt
+	}
+	defer stmt.Close()
+
+	var id uuid.UUID
+	err := stmt.QueryRowContext(ctx).Scan(&id)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return id, nil
+}

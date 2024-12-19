@@ -44,7 +44,24 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 	return nil
 }
 
-const queryUpdateProductQuantity = `UPDATE warehouse_products SET product_quantity = $1, updated_at = $2 WHERE warehouse_id = $3;`
+const queryUpdateNameAndPrice = `UPDATE warehouse_products SET product_name = $1, product_price = $2, updated_at = $3 WHERE product_id = $4;`
+
+func (r *WarehouseProductPostgreRepo) UpdateNameAndPrice(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateNameAndPrice)
+	if errStmt != nil {
+		return errStmt
+	}
+	defer stmt.Close()
+
+	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductName, warehouseProduct.ProductPrice, warehouseProduct.UpdatedAt, warehouseProduct.ProductID)
+	if updateErr != nil {
+		return updateErr
+	}
+
+	return nil
+}
+
+const queryUpdateProductQuantity = `UPDATE warehouse_products SET product_quantity = $1, updated_at = $2 WHERE product_id = $3;`
 
 func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateProductQuantity)
@@ -53,7 +70,7 @@ func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context,
 	}
 	defer stmt.Close()
 
-	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductQuantity, warehouseProduct.UpdatedAt, warehouseProduct.WarehouseID)
+	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductQuantity, warehouseProduct.UpdatedAt, warehouseProduct.ProductID)
 	if updateErr != nil {
 		return updateErr
 	}
