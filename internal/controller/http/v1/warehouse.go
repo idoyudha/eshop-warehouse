@@ -14,6 +14,18 @@ type warehouseRoutes struct {
 	l  logger.Interface
 }
 
+func newWarehouseRoutes(handler *gin.RouterGroup, uc usecase.Warehouse, l logger.Interface) {
+	r := &warehouseRoutes{uc: uc, l: l}
+
+	h := handler.Group("/warehouses")
+	{
+		h.POST("", r.createWarehouse)
+		h.GET("", r.getAllWarehouses)
+		h.GET("/:id", r.getWarehouseByID)
+		h.PATCH("/:id", r.updateWarehouse)
+	}
+}
+
 type CreateWarehouseRequest struct {
 	Name    string `json:"name" binding:"required"`
 	Street  string `json:"street" binding:"required"`
