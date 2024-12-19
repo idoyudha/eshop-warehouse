@@ -14,10 +14,10 @@ type stockMovementRoutes struct {
 	l  logger.Interface
 }
 
-func newStockMovementRoutes(handler *gin.RouterGroup, uc usecase.StockMovement, l logger.Interface) {
+func newStockMovementRoutes(handler *gin.RouterGroup, uc usecase.StockMovement, l logger.Interface, authMid gin.HandlerFunc) {
 	r := &stockMovementRoutes{uc: uc, l: l}
 
-	h := handler.Group("/stock-movements")
+	h := handler.Group("/stock-movement").Use(authMid)
 	{
 		h.GET("", r.getAllStockMovements)
 		h.GET("/product/:product_id", r.getStockMovementByProductID)

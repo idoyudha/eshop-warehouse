@@ -14,10 +14,10 @@ type warehouseRoutes struct {
 	l  logger.Interface
 }
 
-func newWarehouseRoutes(handler *gin.RouterGroup, uc usecase.Warehouse, l logger.Interface) {
+func newWarehouseRoutes(handler *gin.RouterGroup, uc usecase.Warehouse, l logger.Interface, authMid gin.HandlerFunc) {
 	r := &warehouseRoutes{uc: uc, l: l}
 
-	h := handler.Group("/warehouses")
+	h := handler.Group("/warehouse").Use(authMid)
 	{
 		h.POST("", r.createWarehouse)
 		h.GET("", r.getAllWarehouses)
