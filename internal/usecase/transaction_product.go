@@ -68,12 +68,12 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovement *
 		return err
 	}
 
-	quantityFromInitial := math.Min(float64(product.ProductQuantity), float64(product.ProductQuantity))
+	quantityFromInitial := math.Min(float64(product.ProductQuantity), float64(stockMovement.Quantity))
 	curStockMovement := &entity.StockMovement{
 		ID:              id,
 		ProductID:       stockMovement.ProductID,
 		ProductName:     stockMovement.ProductName,
-		Quantity:        product.ProductQuantity,
+		Quantity:        int64(quantityFromInitial),
 		FromWarehouseID: stockMovement.FromWarehouseID,
 		ToUserID:        stockMovement.ToUserID,
 		CreatedAt:       stockMovement.CreatedAt,

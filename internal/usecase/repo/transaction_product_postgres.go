@@ -208,9 +208,17 @@ func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockM
 
 	for _, movement := range stockMovement {
 		// 1. lock source product row
+		var whSrcProduct entity.WarehouseProduct
 		if err = tx.QueryRowContext(ctx, queryLockSourceProduct,
 			movement.ProductID, movement.FromWarehouseID,
-		).Scan(&struct{}{}); err != nil {
+		).Scan(
+			&whSrcProduct.ID,
+			&whSrcProduct.ProductSKU,
+			&whSrcProduct.ProductImageURL,
+			&whSrcProduct.ProductDescription,
+			&whSrcProduct.ProductPrice,
+			&whSrcProduct.ProductCategoryID,
+		); err != nil {
 			return fmt.Errorf("failed to lock source product: %w", err)
 		}
 
