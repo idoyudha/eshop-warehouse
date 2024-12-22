@@ -3,7 +3,7 @@ app:
   version: '1.0.0'
 
 http:
-  port: '2002'
+  port: '2005'
 
 log:
   level: 'debug'

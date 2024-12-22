@@ -81,10 +81,14 @@ func KafkaNewRouter(
 }
 
 type KafkaProductCreatedMessage struct {
-	ProductID       uuid.UUID `json:"product_id"`
-	ProductName     string    `json:"product_name"`
-	ProductPrice    float64   `json:"product_price"`
-	ProductQuantity int64     `json:"product_quantity"`
+	ID          uuid.UUID `json:"id"`
+	SKU         string    `json:"sku"`
+	Name        string    `json:"name"`
+	ImageURL    string    `json:"image_url"`
+	Description string    `json:"description"`
+	Price       float64   `json:"price"`
+	Quantity    int       `json:"quantity"`
+	CategoryID  uuid.UUID `json:"category_id"`
 }
 
 func (r *kafkaConsumerRoutes) handleProductCreated(msg *kafka.Message) error {
@@ -102,11 +106,15 @@ func (r *kafkaConsumerRoutes) handleProductCreated(msg *kafka.Message) error {
 	}
 
 	product := &entity.WarehouseProduct{
-		ProductID:       message.ProductID,
-		ProductName:     message.ProductName,
-		ProductPrice:    message.ProductPrice,
-		ProductQuantity: message.ProductQuantity,
-		WarehouseID:     warehouseMainID,
+		WarehouseID:        warehouseMainID,
+		ProductID:          message.ID,
+		ProductSKU:         message.SKU,
+		ProductName:        message.Name,
+		ProductImageURL:    message.ImageURL,
+		ProductDescription: message.Description,
+		ProductPrice:       message.Price,
+		ProductQuantity:    int64(message.Quantity),
+		ProductCategoryID:  message.CategoryID,
 	}
 
 	if err := r.ucp.CreateWarehouseProduct(context.Background(), product); err != nil {
@@ -120,9 +128,12 @@ func (r *kafkaConsumerRoutes) handleProductCreated(msg *kafka.Message) error {
 }
 
 type KafkaProductUpdatedMessage struct {
-	ProductID    uuid.UUID `json:"product_id"`
-	ProductName  string    `json:"product_name"`
-	ProductPrice float64   `json:"product_price"`
+	ProductID          uuid.UUID `json:"product_id"`
+	ProductName        string    `json:"product_name"`
+	ProductImageURL    string    `json:"product_image_url"`
+	ProductDescription string    `json:"product_description"`
+	ProductPrice       float64   `json:"product_price"`
+	ProductCategoryID  uuid.UUID `json:"product_category_id"`
 }
 
 func (r *kafkaConsumerRoutes) handleProductUpdated(msg *kafka.Message) error {
@@ -134,12 +145,15 @@ func (r *kafkaConsumerRoutes) handleProductUpdated(msg *kafka.Message) error {
 	}
 
 	product := &entity.WarehouseProduct{
-		ProductID:    message.ProductID,
-		ProductName:  message.ProductName,
-		ProductPrice: message.ProductPrice,
+		ProductID:          message.ProductID,
+		ProductName:        message.ProductName,
+		ProductImageURL:    message.ProductImageURL,
+		ProductDescription: message.ProductDescription,
+		ProductPrice:       message.ProductPrice,
+		ProductCategoryID:  message.ProductCategoryID,
 	}
 
-	if err := r.ucp.UpdateWarehouseProductNameAndPrice(context.Background(), product); err != nil {
+	if err := r.ucp.UpdateWarehouseProduct(context.Background(), product); err != nil {
 		r.l.Error(err, "http - v1 - kafkaConsumerRoutes - handleProductUpdated")
 		return err
 	}

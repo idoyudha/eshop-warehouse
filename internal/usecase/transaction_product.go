@@ -124,5 +124,6 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovement *
 			remainingQuantity -= int64(quantityFromWarehouse)
 		}
 	}
+
 	return u.repoTransactionPostgre.TransferOut(ctx, stockMovements)
 }

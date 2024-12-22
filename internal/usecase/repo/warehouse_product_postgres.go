@@ -18,7 +18,10 @@ func NewWarehouseProductPostgreRepo(client *postgresql.Postgres) *WarehouseProdu
 	}
 }
 
-const queryInsertWarehouseProduct = `INSERT INTO warehouse_products (id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+const queryInsertWarehouseProduct = `
+	INSERT INTO warehouse_products (id, warehouse_id, product_id, product_sku, product_name, product_image_url, product_description, product_price, product_quantity, product_category_id, created_at, updated_at) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
+`
 
 func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouseProduct)
@@ -31,9 +34,13 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 		warehouseProduct.ID,
 		warehouseProduct.WarehouseID,
 		warehouseProduct.ProductID,
+		warehouseProduct.ProductSKU,
 		warehouseProduct.ProductName,
+		warehouseProduct.ProductImageURL,
+		warehouseProduct.ProductDescription,
 		warehouseProduct.ProductPrice,
 		warehouseProduct.ProductQuantity,
+		warehouseProduct.ProductCategoryID,
 		warehouseProduct.CreatedAt,
 		warehouseProduct.UpdatedAt,
 	)
@@ -44,16 +51,28 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 	return nil
 }
 
-const queryUpdateNameAndPrice = `UPDATE warehouse_products SET product_name = $1, product_price = $2, updated_at = $3 WHERE product_id = $4;`
+const queryUpdateNameAndPrice = `
+	UPDATE warehouse_products 
+	SET product_name = $1, product_image_url = $2, product_description = $3, product_price = $4, product_category_id = $5, updated_at = $6
+	WHERE product_id = $4;
+`
 
-func (r *WarehouseProductPostgreRepo) UpdateNameAndPrice(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
+func (r *WarehouseProductPostgreRepo) Update(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateNameAndPrice)
 	if errStmt != nil {
 		return errStmt
 	}
 	defer stmt.Close()
 
-	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductName, warehouseProduct.ProductPrice, warehouseProduct.UpdatedAt, warehouseProduct.ProductID)
+	_, updateErr := stmt.ExecContext(ctx,
+		warehouseProduct.ProductName,
+		warehouseProduct.ProductImageURL,
+		warehouseProduct.ProductDescription,
+		warehouseProduct.ProductPrice,
+		warehouseProduct.ProductCategoryID,
+		warehouseProduct.UpdatedAt,
+		warehouseProduct.ProductID,
+	)
 	if updateErr != nil {
 		return updateErr
 	}
@@ -78,7 +97,11 @@ func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context,
 	return nil
 }
 
-const queryGetAllWarehouseProducts = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE deleted_at IS NULL;`
+const queryGetAllWarehouseProducts = `
+	SELECT id, warehouse_id, product_id, product_sku, product_name, product_image_url, product_description, product_price, product_quantity, product_category_id, created_at, updated_at
+	FROM warehouse_products 
+	WHERE deleted_at IS NULL;
+`
 
 func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouseProducts)
@@ -100,9 +123,13 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 			&warehouseProduct.ID,
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
+			&warehouseProduct.ProductSKU,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductImageURL,
+			&warehouseProduct.ProductDescription,
 			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
+			&warehouseProduct.ProductCategoryID,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
 		)
@@ -115,7 +142,11 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByProductID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByProductID = `
+	SELECT id, warehouse_id, product_id, product_sku, product_name, product_image_url, product_description, product_price, product_quantity, product_category_id, created_at, updated_at
+	FROM warehouse_products 
+	WHERE product_id = $1 AND deleted_at IS NULL;
+`
 
 func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductID)
@@ -137,9 +168,13 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 			&warehouseProduct.ID,
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
+			&warehouseProduct.ProductSKU,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductImageURL,
+			&warehouseProduct.ProductDescription,
 			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
+			&warehouseProduct.ProductCategoryID,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
 		)
@@ -152,7 +187,11 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE warehouse_id = $1 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByWarehouseID = `
+	SELECT id, warehouse_id, product_id, product_sku, product_name, product_image_url, product_description, product_price, product_quantity, product_category_id, created_at, updated_at
+	FROM warehouse_products 
+	WHERE warehouse_id = $1 AND deleted_at IS NULL;
+`
 
 func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByWarehouseID)
@@ -174,9 +213,13 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 			&warehouseProduct.ID,
 			&warehouseProduct.WarehouseID,
 			&warehouseProduct.ProductID,
+			&warehouseProduct.ProductSKU,
 			&warehouseProduct.ProductName,
+			&warehouseProduct.ProductImageURL,
+			&warehouseProduct.ProductDescription,
 			&warehouseProduct.ProductPrice,
 			&warehouseProduct.ProductQuantity,
+			&warehouseProduct.ProductCategoryID,
 			&warehouseProduct.CreatedAt,
 			&warehouseProduct.UpdatedAt,
 		)
@@ -189,7 +232,11 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 	return warehouseProducts, nil
 }
 
-const queryGetWarehouseProductByProductIDAndWarehouseID = `SELECT id, warehouse_id, product_id, product_name, product_price, product_quantity, created_at, updated_at FROM warehouse_products WHERE product_id = $1 AND warehouse_id = $2 AND deleted_at IS NULL;`
+const queryGetWarehouseProductByProductIDAndWarehouseID = `
+	SELECT id, warehouse_id, product_id, product_sku, product_name, product_image_url, product_description, product_price, product_quantity, product_category_id, created_at, updated_at
+	FROM warehouse_products 
+	WHERE product_id = $1 AND warehouse_id = $2 AND deleted_at IS NULL;
+`
 
 func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.Context, productID uuid.UUID, warehouseID uuid.UUID) (*entity.WarehouseProduct, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductIDAndWarehouseID)
@@ -203,9 +250,13 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 		&warehouseProduct.ID,
 		&warehouseProduct.WarehouseID,
 		&warehouseProduct.ProductID,
+		&warehouseProduct.ProductSKU,
 		&warehouseProduct.ProductName,
+		&warehouseProduct.ProductImageURL,
+		&warehouseProduct.ProductDescription,
 		&warehouseProduct.ProductPrice,
 		&warehouseProduct.ProductQuantity,
+		&warehouseProduct.ProductCategoryID,
 		&warehouseProduct.CreatedAt,
 		&warehouseProduct.UpdatedAt,
 	)

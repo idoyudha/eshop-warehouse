@@ -15,9 +15,13 @@ CREATE TABLE IF NOT EXISTS "warehouse_products" (
     "id" uuid PRIMARY KEY,
     "warehouse_id" uuid NOT NULL,
     "product_id" uuid NOT NULL,
+    "product_sku" varchar NOT NULL,
     "product_name" varchar NOT NULL,
+    "product_image_url" varchar NOT NULL,
+    "product_description" varchar NOT NULL,
     "product_price" float NOT NULL,
     "product_quantity" integer NOT NULL,
+    "product_category_id" uuid NOT NULL,
     "created_at" timestamp NOT NULL,
     "updated_at" timestamp NOT NULL,
     "deleted_at" timestamp

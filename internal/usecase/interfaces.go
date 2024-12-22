@@ -23,7 +23,7 @@ type (
 
 	WarehouseProductPostgreRepo interface {
 		Save(context.Context, *entity.WarehouseProduct) error
-		UpdateNameAndPrice(context.Context, *entity.WarehouseProduct) error
+		Update(context.Context, *entity.WarehouseProduct) error
 		UpdateProductQuantity(context.Context, *entity.WarehouseProduct) error
 		GetAll(context.Context) ([]*entity.WarehouseProduct, error)
 		GetByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
@@ -53,7 +53,7 @@ type (
 
 	WarehouseProduct interface {
 		CreateWarehouseProduct(context.Context, *entity.WarehouseProduct) error
-		UpdateWarehouseProductNameAndPrice(context.Context, *entity.WarehouseProduct) error
+		UpdateWarehouseProduct(context.Context, *entity.WarehouseProduct) error
 		UpdateWarehouseProductQuantity(context.Context, *entity.WarehouseProduct) error
 		GetAllWarehouseProducts(context.Context) ([]*entity.WarehouseProduct, error)
 		GetWarehouseProductByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
