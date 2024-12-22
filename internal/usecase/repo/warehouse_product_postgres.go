@@ -134,6 +134,7 @@ func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.War
 			&warehouseProduct.UpdatedAt,
 		)
 		if err != nil {
+			// TODO: handle error sql no rows
 			return nil, err
 		}
 		warehouseProducts = append(warehouseProducts, &warehouseProduct)
@@ -156,7 +157,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 	defer stmt.Close()
 
 	var warehouseProducts []*entity.WarehouseProduct
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := stmt.QueryContext(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -179,6 +180,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uui
 			&warehouseProduct.UpdatedAt,
 		)
 		if err != nil {
+			// TODO: handle error sql no rows
 			return nil, err
 		}
 		warehouseProducts = append(warehouseProducts, &warehouseProduct)
@@ -201,7 +203,7 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 	defer stmt.Close()
 
 	var warehouseProducts []*entity.WarehouseProduct
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := stmt.QueryContext(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -224,6 +226,7 @@ func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id u
 			&warehouseProduct.UpdatedAt,
 		)
 		if err != nil {
+			// TODO: handle error sql no rows
 			return nil, err
 		}
 		warehouseProducts = append(warehouseProducts, &warehouseProduct)
@@ -261,6 +264,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 		&warehouseProduct.UpdatedAt,
 	)
 	if err != nil {
+		// TODO: handle error sql no rows
 		return nil, err
 	}
 

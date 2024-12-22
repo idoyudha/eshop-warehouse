@@ -22,7 +22,7 @@ func newWarehouseProductRoutes(
 ) {
 	r := &warehouseProductRoutes{uc: uc, l: l}
 
-	h := handler.Group("/warehouse-product").Use(authMid)
+	h := handler.Group("/warehouse-products").Use(authMid)
 	{
 		h.GET("", r.getAllWarehouseProducts)
 		h.GET("/product/:product_id", r.getWarehouseProductByProductID)
