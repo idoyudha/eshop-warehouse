@@ -18,7 +18,7 @@ func NewWarehousePostgreRepo(client *postgresql.Postgres) *WarehousePostgreRepo 
 	}
 }
 
-const queryInsertWarehouse = `INSERT INTO warehouse (id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+const queryInsertWarehouse = `INSERT INTO warehouses (id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
 
 func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouse)
@@ -45,7 +45,7 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 	return nil
 }
 
-const queryUpdateWarehouse = `UPDATE warehouse SET name = $1, street = $2, updated_at = $3 WHERE id = $4;`
+const queryUpdateWarehouse = `UPDATE warehouses SET name = $1, street = $2, updated_at = $3 WHERE id = $4;`
 
 func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateWarehouse)
@@ -62,7 +62,7 @@ func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.War
 	return nil
 }
 
-const queryGetByID = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE id = $1 AND deleted_at IS NULL;`
+const queryGetByID = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE id = $1 AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.Warehouse, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetByID)
@@ -90,7 +90,7 @@ func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*enti
 	return &warehouse, nil
 }
 
-const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE deleted_at IS NULL;`
+const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouse)
@@ -128,7 +128,7 @@ func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse,
 	return warehouses, nil
 }
 
-const queryGetAllExceptMainWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouse WHERE is_main_warehouse = false AND deleted_at IS NULL;`
+const queryGetAllExceptMainWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE is_main_warehouse = false AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.Warehouse, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllExceptMainWarehouse)
@@ -166,7 +166,7 @@ func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.
 	return warehouses, nil
 }
 
-const queryGetMainIDWarehouse = `SELECT id FROM warehouse WHERE is_main_warehouse = true AND deleted_at IS NULL;`
+const queryGetMainIDWarehouse = `SELECT id FROM warehouses WHERE is_main_warehouse = true AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetMainID(ctx context.Context) (uuid.UUID, error) {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetMainIDWarehouse)
