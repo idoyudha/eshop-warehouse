@@ -26,7 +26,7 @@ func newWarehouseRoutes(handler *gin.RouterGroup, uc usecase.Warehouse, l logger
 	}
 }
 
-type CreateWarehouseRequest struct {
+type createWarehouseRequest struct {
 	Name    string `json:"name" binding:"required"`
 	Street  string `json:"street" binding:"required"`
 	City    string `json:"city" binding:"required"`
@@ -34,34 +34,51 @@ type CreateWarehouseRequest struct {
 	ZipCode string `json:"zip_code" binding:"required"`
 }
 
+type createWarehouseResponse struct {
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	Street          string    `json:"street"`
+	City            string    `json:"city"`
+	State           string    `json:"state"`
+	ZipCode         string    `json:"zip_code"`
+	IsMainWarehouse bool      `json:"is_main_warehouse"`
+}
+
 func (r *warehouseRoutes) createWarehouse(ctx *gin.Context) {
-	var req CreateWarehouseRequest
+	var req createWarehouseRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
-	warehouse, err := CreateWarehouseRequestToWarehouseEntity(req)
+	warehouse := createWarehouseRequestToWarehouseEntity(req)
+
+	err := r.uc.CreateWarehouse(ctx.Request.Context(), &warehouse)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
 		return
 	}
 
-	err = r.uc.CreateWarehouse(ctx.Request.Context(), &warehouse)
-	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
-		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
-		return
-	}
+	warehouseResponse := warehouseEntityToCreateWarehouseResponse(warehouse)
 
-	ctx.JSON(http.StatusCreated, newCreateSuccess(warehouse))
+	ctx.JSON(http.StatusCreated, newCreateSuccess(warehouseResponse))
 }
 
-type UpdateWarehouseRequest struct {
+type updateWarehouseRequest struct {
 	Name   string `json:"name" binding:"required"`
 	Street string `json:"street" binding:"required"`
+}
+
+type updateWarehouseResponse struct {
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	Street          string    `json:"street"`
+	City            string    `json:"city"`
+	State           string    `json:"state"`
+	ZipCode         string    `json:"zip_code"`
+	IsMainWarehouse bool      `json:"is_main_warehouse"`
 }
 
 func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
@@ -72,19 +89,14 @@ func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
 		return
 	}
 
-	var req UpdateWarehouseRequest
+	var req updateWarehouseRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - updateWarehouse")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
-	warehouse, err := UpdateWarehouseRequestToWarehouseEntity(req, warehouseID)
-	if err != nil {
-		r.l.Error(err, "http - v1 - warehouseRoutes - updateWarehouse")
-		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
-		return
-	}
+	warehouse := updateWarehouseRequestToWarehouseEntity(req, warehouseID)
 
 	err = r.uc.UpdateWarehouse(ctx.Request.Context(), &warehouse)
 	if err != nil {
@@ -93,7 +105,19 @@ func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newUpdateSuccess(warehouse))
+	warehouseResponse := warehouseEntityToUpdateWarehouseResponse(warehouse)
+
+	ctx.JSON(http.StatusOK, newUpdateSuccess(warehouseResponse))
+}
+
+type getWarehouseResponse struct {
+	ID              uuid.UUID `json:"id"`
+	Name            string    `json:"name"`
+	Street          string    `json:"street"`
+	City            string    `json:"city"`
+	State           string    `json:"state"`
+	ZipCode         string    `json:"zip_code"`
+	IsMainWarehouse bool      `json:"is_main_warehouse"`
 }
 
 func (r *warehouseRoutes) getWarehouseByID(ctx *gin.Context) {
@@ -111,7 +135,9 @@ func (r *warehouseRoutes) getWarehouseByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newGetSuccess(warehouse))
+	warehouseResponse := warehouseEntityToGetWarehouseResponse(*warehouse)
+
+	ctx.JSON(http.StatusOK, newGetSuccess(warehouseResponse))
 }
 
 func (r *warehouseRoutes) getAllWarehouses(ctx *gin.Context) {
@@ -122,5 +148,7 @@ func (r *warehouseRoutes) getAllWarehouses(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newGetSuccess(warehouses))
+	warehousesResponse := warehouseEntitiesToGetAllWarehouseResponse(warehouses)
+
+	ctx.JSON(http.StatusOK, newGetSuccess(warehousesResponse))
 }

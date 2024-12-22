@@ -24,6 +24,11 @@ func NewTransactionProductUseCase(repoRedis WarehouseRankRedisRepo, repoTransact
 }
 
 func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *entity.StockMovement) error {
+	err := stockMovement.GenerateStockMovementID()
+	if err != nil {
+		return err
+	}
+
 	warehouseProduct, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, stockMovement.FromWarehouseID)
 	if err != nil {
 		return err

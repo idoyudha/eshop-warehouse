@@ -21,3 +21,13 @@ type WarehouseProduct struct {
 	UpdatedAt          time.Time `json:"updated_at"`
 	DeletedAt          time.Time `json:"deleted_at"`
 }
+
+func (wp *WarehouseProduct) GenerateWarehouseProductID() error {
+	WarehouseProductID, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+
+	wp.ID = WarehouseProductID
+	return nil
+}

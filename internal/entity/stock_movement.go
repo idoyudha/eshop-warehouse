@@ -16,3 +16,13 @@ type StockMovement struct {
 	ToUserID        uuid.UUID `json:"to_user_id"` // for moving out to user (DELIVERED)
 	CreatedAt       time.Time `json:"created_at"`
 }
+
+func (sm *StockMovement) GenerateStockMovementID() error {
+	stockMovementID, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+
+	sm.ID = stockMovementID
+	return nil
+}

@@ -55,14 +55,9 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 		return
 	}
 
-	stockMovement, err := CreateStockMovementInRequestToStockMovementEntity(req)
-	if err != nil {
-		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
-		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
-		return
-	}
+	stockMovement := createStockMovementInRequestToStockMovementEntity(req)
 
-	err = r.uct.MoveIn(ctx.Request.Context(), &stockMovement)
+	err := r.uct.MoveIn(ctx.Request.Context(), &stockMovement)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -72,7 +67,7 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, newCreateSuccess(stockMovement))
 }
 
-type CreateStockMovementOut struct {
+type createStockMovementOut struct {
 	ProductID       uuid.UUID `json:"product_id"`
 	ProductName     string    `json:"product_name"`
 	Quantity        int64     `json:"quantity"`
@@ -81,21 +76,16 @@ type CreateStockMovementOut struct {
 }
 
 func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
-	var req CreateStockMovementOut
+	var req createStockMovementOut
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
 
-	stockMovement, err := CreateStockMovementOutRequestToStockMovementEntity(req)
-	if err != nil {
-		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
-		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
-		return
-	}
+	stockMovement := createStockMovementOutRequestToStockMovementEntity(req)
 
-	err = r.uct.MoveOut(ctx.Request.Context(), &stockMovement)
+	err := r.uct.MoveOut(ctx.Request.Context(), &stockMovement)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))

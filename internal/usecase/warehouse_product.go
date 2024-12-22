@@ -18,6 +18,10 @@ func NewWarehouseProductUseCase(repoPostgre WarehouseProductPostgreRepo) *Wareho
 }
 
 func (u *WarehouseProductUseCase) CreateWarehouseProduct(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
+	err := warehouseProduct.GenerateWarehouseProductID()
+	if err != nil {
+		return err
+	}
 	return u.repoPostgre.Save(ctx, warehouseProduct)
 }
 

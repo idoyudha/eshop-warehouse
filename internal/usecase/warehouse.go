@@ -22,6 +22,11 @@ func NewWarehouseUseCase(repoRedis WarehouseRankRedisRepo, repoPostgre Warehouse
 }
 
 func (u *WarehouseUseCase) CreateWarehouse(ctx context.Context, warehouse *entity.Warehouse) error {
+	err := warehouse.GenerateWarehouseID()
+	if err != nil {
+		return err
+	}
+
 	// check if this is the first warehouse
 	existingWarehouses, err := u.repoPostgre.GetAllExceptMain(ctx)
 	if err != nil {
