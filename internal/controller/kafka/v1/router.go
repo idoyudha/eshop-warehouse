@@ -80,7 +80,7 @@ func KafkaNewRouter(
 	return nil
 }
 
-type KafkaProductCreatedMessage struct {
+type kafkaProductCreatedMessage struct {
 	ID          uuid.UUID `json:"id"`
 	SKU         string    `json:"sku"`
 	Name        string    `json:"name"`
@@ -92,7 +92,7 @@ type KafkaProductCreatedMessage struct {
 }
 
 func (r *kafkaConsumerRoutes) handleProductCreated(msg *kafka.Message) error {
-	var message KafkaProductCreatedMessage
+	var message kafkaProductCreatedMessage
 
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
 		r.l.Error(err, "http - v1 - kafkaConsumerRoutes - handleProductCreated")
@@ -127,7 +127,7 @@ func (r *kafkaConsumerRoutes) handleProductCreated(msg *kafka.Message) error {
 	return nil
 }
 
-type KafkaProductUpdatedMessage struct {
+type kafkaProductUpdatedMessage struct {
 	ProductID          uuid.UUID `json:"product_id"`
 	ProductName        string    `json:"product_name"`
 	ProductImageURL    string    `json:"product_image_url"`
@@ -137,7 +137,7 @@ type KafkaProductUpdatedMessage struct {
 }
 
 func (r *kafkaConsumerRoutes) handleProductUpdated(msg *kafka.Message) error {
-	var message KafkaProductUpdatedMessage
+	var message kafkaProductUpdatedMessage
 
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
 		r.l.Error(err, "http - v1 - kafkaConsumerRoutes - handleProductUpdated")
