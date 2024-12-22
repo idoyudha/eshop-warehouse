@@ -18,7 +18,10 @@ func NewWarehousePostgreRepo(client *postgresql.Postgres) *WarehousePostgreRepo 
 	}
 }
 
-const queryInsertWarehouse = `INSERT INTO warehouses (id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+const queryInsertWarehouse = `
+	INSERT INTO warehouses (id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at) 
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+`
 
 func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouse)
