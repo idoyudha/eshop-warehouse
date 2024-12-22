@@ -35,7 +35,8 @@ func newStockMovementRoutes(
 		h.GET("", r.getAllStockMovements)
 		h.GET("/product/:product_id", r.getStockMovementByProductID)
 		h.GET("/source/:source_id", r.getStockMovementBySourceID)
-		h.GET("/destination/:source_id", r.getStockMovementByDestinationID)
+		h.GET("/destination/:destination_id", r.getStockMovementByDestinationID)
+		// TODO: route for get stock movement destination user id
 	}
 }
 
