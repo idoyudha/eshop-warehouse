@@ -28,7 +28,7 @@ func newStockMovementRoutes(
 		l:   l,
 	}
 
-	h := handler.Group("/stock-movement").Use(authMid)
+	h := handler.Group("/stock-movements").Use(authMid)
 	{
 		h.POST("/movein", r.createStockMovementIn)
 		h.POST("/moveout", r.createStockMovementOut)

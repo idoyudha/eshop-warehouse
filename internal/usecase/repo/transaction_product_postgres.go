@@ -23,7 +23,7 @@ func NewTransactionProductPostgreRepo(client *postgresql.Postgres) *TransactionP
 const (
 	// locks the rows with FOR UPDATE
 	queryLockSourceProduct = `
-		SELECT id 
+		SELECT id, product_sku, product_image_url, product_description, product_price, product_category_id 
 		FROM warehouse_products 
 		WHERE product_id = $1 
 		AND warehouse_id = $2 
@@ -59,12 +59,17 @@ const (
 		INSERT INTO warehouse_products (
 			id, 
 			warehouse_id, 
-			product_id, 
-			product_name, 
+			product_id,
+			product_sku,
+			product_name,
+			product_image_url,
+			product_description,
+			product_price, 
 			product_quantity,
+			product_category_id,
 			created_at, 
 			updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
 
 	queryInsertWarehouseMovement = `
 		INSERT INTO stock_movements (
@@ -90,17 +95,26 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	defer tx.Rollback()
 
 	// 1. lock source product row if exists
+	var whSrcProduct entity.WarehouseProduct
 	if err = tx.QueryRowContext(ctx, queryLockSourceProduct,
 		stockMovement.ProductID, stockMovement.FromWarehouseID,
-	).Scan(&struct{}{}); err != nil {
+	).Scan(
+		&whSrcProduct.ID,
+		&whSrcProduct.ProductSKU,
+		&whSrcProduct.ProductImageURL,
+		&whSrcProduct.ProductDescription,
+		&whSrcProduct.ProductPrice,
+		&whSrcProduct.ProductCategoryID,
+	); err != nil {
 		return fmt.Errorf("failed to lock source product: %w", err)
 	}
 
 	// 2. lock destination product row if exists
 	var destExist bool
+	var whDestProductID uuid.UUID
 	err = tx.QueryRowContext(ctx, queryLockDestProduct,
 		stockMovement.ProductID, stockMovement.ToWarehouseID,
-	).Scan(&struct{}{})
+	).Scan(&whDestProductID)
 	destExist = err != sql.ErrNoRows
 	if err != nil && err != sql.ErrNoRows {
 		return fmt.Errorf("failed to check or lock destination product: %w", err)
@@ -131,8 +145,13 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 			newID,
 			stockMovement.ToWarehouseID,
 			stockMovement.ProductID,
+			whSrcProduct.ProductSKU,
 			stockMovement.ProductName,
+			whSrcProduct.ProductImageURL,
+			whSrcProduct.ProductDescription,
+			whSrcProduct.ProductPrice,
 			stockMovement.Quantity,
+			whSrcProduct.ProductCategoryID,
 			stockMovement.CreatedAt,
 			stockMovement.CreatedAt,
 		)

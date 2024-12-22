@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS "warehouse_products" (
     "deleted_at" timestamp
 );
 
-CREATE TABLE IF NOT EXISTS "stock_movement" (
+CREATE TABLE IF NOT EXISTS "stock_movements" (
     "id" uuid PRIMARY KEY,
     "product_id" uuid NOT NULL,
     "product_name" varchar NOT NULL,
@@ -45,5 +45,5 @@ CREATE INDEX warehouse_products_warehouse_id_idx ON warehouse_products (warehous
 
 ALTER TABLE warehouse_products ADD FOREIGN KEY (warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
 
-ALTER TABLE stock_movement ADD FOREIGN KEY (from_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
-ALTER TABLE stock_movement ADD FOREIGN KEY (to_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE stock_movements ADD FOREIGN KEY (from_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE stock_movements ADD FOREIGN KEY (to_warehouse_id) REFERENCES warehouses (id) ON UPDATE CASCADE ON DELETE CASCADE;
