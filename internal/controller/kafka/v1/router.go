@@ -138,7 +138,6 @@ type kafkaProductUpdatedMessage struct {
 
 func (r *kafkaConsumerRoutes) handleProductUpdated(msg *kafka.Message) error {
 	var message kafkaProductUpdatedMessage
-
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
 		r.l.Error(err, "http - v1 - kafkaConsumerRoutes - handleProductUpdated")
 		return err

@@ -54,7 +54,7 @@ func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct
 const queryUpdateNameAndPrice = `
 	UPDATE warehouse_products 
 	SET product_name = $1, product_image_url = $2, product_description = $3, product_price = $4, product_category_id = $5, updated_at = $6
-	WHERE product_id = $4;
+	WHERE product_id = $7;
 `
 
 func (r *WarehouseProductPostgreRepo) Update(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
