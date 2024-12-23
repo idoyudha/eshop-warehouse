@@ -76,7 +76,6 @@ type createStockMovementOut struct {
 type itemStockMovementOut struct {
 	ProductID uuid.UUID `json:"product_id" binding:"required"`
 	Quantity  int64     `json:"quantity" binding:"required"`
-	Price     float64   `json:"price" binding:"required"`
 }
 
 func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
