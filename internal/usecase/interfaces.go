@@ -19,6 +19,7 @@ type (
 		GetAll(context.Context) ([]*entity.Warehouse, error)
 		GetAllExceptMain(context.Context) ([]*entity.Warehouse, error)
 		GetMainID(context.Context) (uuid.UUID, error)
+		// GetAllIDAndZipCode(context.Context) ([]*entity.Warehouse, error)
 	}
 
 	WarehouseProductPostgreRepo interface {
@@ -29,6 +30,7 @@ type (
 		GetByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
 		GetByWarehouseID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
 		GetByProductIDAndWarehouseID(context.Context, uuid.UUID, uuid.UUID) (*entity.WarehouseProduct, error)
+		GetWarehouseIDZipCodeAndQtyByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseAddressAndProductQty, error)
 	}
 
 	StockMovementPostgreRepo interface {
@@ -70,6 +72,6 @@ type (
 
 	TransactionProduct interface {
 		MoveIn(context.Context, *entity.StockMovement) error
-		MoveOut(context.Context, []*entity.StockMovement) error
+		MoveOut(context.Context, []*entity.StockMovement, string) error
 	}
 )

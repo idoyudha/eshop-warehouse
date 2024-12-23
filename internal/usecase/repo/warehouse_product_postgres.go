@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
@@ -247,6 +248,7 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 		return nil, errStmt
 	}
 	defer stmt.Close()
+	log.Printf("GetByProductIDAndWarehouseID productid => %s, warehouseid => %s", productID.String(), warehouseID.String())
 
 	var warehouseProduct entity.WarehouseProduct
 	err := stmt.QueryRowContext(ctx, productID, warehouseID).Scan(
@@ -269,4 +271,43 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 	}
 
 	return &warehouseProduct, nil
+}
+
+const queryGetWarehouseIDAndZipCodeByProductID = `
+	SELECT warehouse_id, zip_code, product_name,product_quantity
+	FROM warehouse_products
+	JOIN warehouses
+	ON warehouse_products.warehouse_id = warehouses.id
+	WHERE warehouse_products.product_id = $1 AND warehouse_products.deleted_at IS NULL and warehouses.deleted_at IS NULL;
+`
+
+func (r *WarehouseProductPostgreRepo) GetWarehouseIDZipCodeAndQtyByProductID(ctx context.Context, productID uuid.UUID) ([]*entity.WarehouseAddressAndProductQty, error) {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseIDAndZipCodeByProductID)
+	if errStmt != nil {
+		return nil, errStmt
+	}
+	defer stmt.Close()
+
+	var warehouseAndProducts []*entity.WarehouseAddressAndProductQty
+	rows, err := stmt.QueryContext(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var warehouseAndProduct entity.WarehouseAddressAndProductQty
+		err := rows.Scan(
+			&warehouseAndProduct.WarehouseID,
+			&warehouseAndProduct.ZipCode,
+			&warehouseAndProduct.ProductName,
+			&warehouseAndProduct.ProductQuantity,
+		)
+		if err != nil {
+			return nil, err
+		}
+		warehouseAndProducts = append(warehouseAndProducts, &warehouseAndProduct)
+	}
+
+	return warehouseAndProducts, nil
 }

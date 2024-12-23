@@ -186,3 +186,34 @@ func (r *WarehousePostgreRepo) GetMainID(ctx context.Context) (uuid.UUID, error)
 
 	return id, nil
 }
+
+// const queryGetAllWarehouseIDAndZipCode = `SELECT id, zip_code FROM warehouses WHERE deleted_at IS NULL ORDER BY zip_code ASC;`
+
+// func (r *WarehousePostgreRepo) GetAllIDAndZipCode(ctx context.Context) ([]*entity.Warehouse, error) {
+// 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouseIDAndZipCode)
+// 	if errStmt != nil {
+// 		return nil, errStmt
+// 	}
+// 	defer stmt.Close()
+
+// 	var warehouses []*entity.Warehouse
+// 	rows, err := stmt.QueryContext(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		var warehouse entity.Warehouse
+// 		err := rows.Scan(
+// 			&warehouse.ID,
+// 			&warehouse.ZipCode,
+// 		)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		warehouses = append(warehouses, &warehouse)
+// 	}
+
+// 	return warehouses, nil
+// }

@@ -31,3 +31,10 @@ func (wp *WarehouseProduct) GenerateWarehouseProductID() error {
 	wp.ID = WarehouseProductID
 	return nil
 }
+
+type WarehouseAddressAndProductQty struct {
+	WarehouseID     uuid.UUID
+	ZipCode         string
+	ProductName     string
+	ProductQuantity int64
+}

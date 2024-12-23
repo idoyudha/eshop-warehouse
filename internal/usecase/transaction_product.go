@@ -3,10 +3,9 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"math"
 
-	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
+	"github.com/idoyudha/eshop-warehouse/internal/utils"
 )
 
 type TransactionProductUseCase struct {
@@ -15,7 +14,11 @@ type TransactionProductUseCase struct {
 	repoProductPostgre     WarehouseProductPostgreRepo
 }
 
-func NewTransactionProductUseCase(repoRedis WarehouseRankRedisRepo, repoTransactionPostgre TransactionProductPostgresRepo, repoProductPostgre WarehouseProductPostgreRepo) *TransactionProductUseCase {
+func NewTransactionProductUseCase(
+	repoRedis WarehouseRankRedisRepo,
+	repoTransactionPostgre TransactionProductPostgresRepo,
+	repoProductPostgre WarehouseProductPostgreRepo,
+) *TransactionProductUseCase {
 	return &TransactionProductUseCase{
 		repoRedis,
 		repoTransactionPostgre,
@@ -42,93 +45,39 @@ func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *e
 }
 
 // move from warehouse to user
-func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementReq []*entity.StockMovement) error {
+func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementReq []*entity.StockMovement, zipCode string) error {
 	var stockMovements []*entity.StockMovement
-	// check if product quantity is enough for all warehouses
 	for _, stockMovement := range stockMovementReq {
-		products, err := u.repoProductPostgre.GetByProductID(ctx, stockMovement.ProductID)
+		// find the nearest warehouse and remaining product quantity for each warehouse
+		// TODO: can be improved if we get from in memory database (redis)
+		warehouses, err := u.repoProductPostgre.GetWarehouseIDZipCodeAndQtyByProductID(ctx, stockMovement.ProductID)
 		if err != nil {
-			return fmt.Errorf("failed to get product by id: %w", err)
+			return fmt.Errorf("failed to get warehouse id and zip code by product id: %w", err)
 		}
 
 		var totalProductQuantity int64
-		for _, product := range products {
-			totalProductQuantity += product.ProductQuantity
+		for _, warehouse := range warehouses {
+			totalProductQuantity += warehouse.ProductQuantity
 		}
 		if totalProductQuantity < stockMovement.Quantity {
-			return fmt.Errorf("product quantity is not enough")
+			return fmt.Errorf("%s requested product quantity is not enough", warehouses[0].ProductName)
 		}
 
-		// get product stock
-		product, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, stockMovement.FromWarehouseID)
+		nearestWarehouseIDs, err := utils.FindNearestWarehouse(zipCode, warehouses, stockMovement.Quantity)
 		if err != nil {
-			return fmt.Errorf("failed to get product by id and warehouse id: %w", err)
+			return fmt.Errorf("failed to calculate nearest warehouse: %w", err)
 		}
 
-		err = stockMovement.GenerateStockMovementID()
-		if err != nil {
-			return fmt.Errorf("failed to generate stock movement id: %w", err)
-		}
-
-		quantityFromInitial := math.Min(float64(product.ProductQuantity), float64(stockMovement.Quantity))
-		stockMovements = append(stockMovements, &entity.StockMovement{
-			ID:              stockMovement.ID,
-			ProductID:       stockMovement.ProductID,
-			ProductName:     product.ProductName,
-			Quantity:        int64(quantityFromInitial),
-			FromWarehouseID: stockMovement.FromWarehouseID,
-			ToUserID:        stockMovement.ToUserID,
-			CreatedAt:       stockMovement.CreatedAt,
-		})
-
-		// get remaining quantity from nearest warehouse
-		remainingQuantity := stockMovement.Quantity - int64(quantityFromInitial)
-		if remainingQuantity > 0 {
-			// 1. get from nearest warehouse -> using redis rank
-			nearestWarehouses, err := u.repoRedis.GetNearestWarehouses(ctx, stockMovement.FromWarehouseID.String())
-			if err != nil {
-				return fmt.Errorf("failed to get nearest warehouses: %w", err)
-			}
-
-			// 2. get product quantity from nearest warehouse
-			for _, nearWarehouse := range nearestWarehouses {
-				if remainingQuantity <= 0 {
-					break
-				}
-
-				// skip inital warehouse
-				if nearWarehouse.WarehouseID == stockMovement.FromWarehouseID.String() {
-					continue
-				}
-
-				warehouseUUID := uuid.MustParse(nearWarehouse.WarehouseID)
-				nearestProduct, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, warehouseUUID)
-				if err != nil {
-					return fmt.Errorf("failed to get product by id and warehouse id: %w", err)
-				}
-
-				// if nearest is empty, skip
-				if nearestProduct.ProductQuantity <= 0 {
-					continue
-				}
-
-				quantityFromWarehouse := math.Min(float64(nearestProduct.ProductQuantity), float64(remainingQuantity))
-
-				otherStockMovement := &entity.StockMovement{
-					ProductID:       stockMovement.ProductID,
-					ProductName:     stockMovement.ProductName,
-					Quantity:        int64(quantityFromWarehouse),
-					FromWarehouseID: warehouseUUID,
-					ToUserID:        stockMovement.ToUserID,
-					CreatedAt:       stockMovement.CreatedAt,
-				}
-				err = otherStockMovement.GenerateStockMovementID()
-				if err != nil {
-					return fmt.Errorf("failed to generate stock movement id: %w", err)
-				}
-				stockMovements = append(stockMovements, otherStockMovement)
-				remainingQuantity -= int64(quantityFromWarehouse)
-			}
+		for warehouseID, quantity := range nearestWarehouseIDs {
+			stockMovements = append(stockMovements, &entity.StockMovement{
+				ID:              stockMovement.ID,
+				ProductID:       stockMovement.ProductID,
+				ProductName:     stockMovement.ProductName,
+				Quantity:        quantity,
+				FromWarehouseID: warehouseID,
+				ToUserID:        stockMovement.ToUserID,
+				CreatedAt:       stockMovement.CreatedAt,
+			})
 		}
 	}
 
