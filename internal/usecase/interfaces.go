@@ -70,6 +70,6 @@ type (
 
 	TransactionProduct interface {
 		MoveIn(context.Context, *entity.StockMovement) error
-		MoveOut(context.Context, *entity.StockMovement) error
+		MoveOut(context.Context, []*entity.StockMovement) error
 	}
 )

@@ -84,13 +84,15 @@ func warehouseEntityToGetWarehouseResponse(warehouse entity.Warehouse) getWareho
 	}
 }
 
-func createStockMovementOutRequestToStockMovementEntity(req createStockMovementOut) entity.StockMovement {
-	return entity.StockMovement{
-		ProductID:       req.ProductID,
-		ProductName:     req.ProductName,
-		Quantity:        req.Quantity,
-		FromWarehouseID: req.FromWarehouseID,
-		ToUserID:        req.ToUserID,
-		CreatedAt:       time.Now(),
+func createStockMovementOutRequestToStockMovementEntity(req createStockMovementOut, userID uuid.UUID) []*entity.StockMovement {
+	var stockMovements []*entity.StockMovement
+	for _, stockMovement := range req.Items {
+		stockMovements = append(stockMovements, &entity.StockMovement{
+			ProductID: stockMovement.ProductID,
+			Quantity:  stockMovement.Quantity,
+			ToUserID:  userID,
+		})
 	}
+
+	return stockMovements
 }

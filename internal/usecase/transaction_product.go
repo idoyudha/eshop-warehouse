@@ -42,91 +42,93 @@ func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *e
 }
 
 // move from warehouse to user
-func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovement *entity.StockMovement) error {
-	// check if product quantity is enough for all warehouses
-	products, err := u.repoProductPostgre.GetByProductID(ctx, stockMovement.ProductID)
-	if err != nil {
-		return err
-	}
-	var totalProductQuantity int64
-	for _, product := range products {
-		totalProductQuantity += product.ProductQuantity
-	}
-	if totalProductQuantity < stockMovement.Quantity {
-		return fmt.Errorf("product quantity is not enough")
-	}
-
-	// get product stock
-	product, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, stockMovement.FromWarehouseID)
-	if err != nil {
-		return err
-	}
-
+func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementReq []*entity.StockMovement) error {
 	var stockMovements []*entity.StockMovement
-	id, err := uuid.NewV7()
-	if err != nil {
-		return err
-	}
-
-	quantityFromInitial := math.Min(float64(product.ProductQuantity), float64(stockMovement.Quantity))
-	curStockMovement := &entity.StockMovement{
-		ID:              id,
-		ProductID:       stockMovement.ProductID,
-		ProductName:     stockMovement.ProductName,
-		Quantity:        int64(quantityFromInitial),
-		FromWarehouseID: stockMovement.FromWarehouseID,
-		ToUserID:        stockMovement.ToUserID,
-		CreatedAt:       stockMovement.CreatedAt,
-	}
-	stockMovements = append(stockMovements, curStockMovement)
-	remainingQuantity := stockMovement.Quantity - int64(quantityFromInitial)
-
-	if remainingQuantity > 0 {
-		// 1. get from nearest warehouse -> using redis rank
-		nearestWarehouses, err := u.repoRedis.GetNearestWarehouses(ctx, stockMovement.FromWarehouseID.String())
+	// check if product quantity is enough for all warehouses
+	for _, stockMovement := range stockMovementReq {
+		products, err := u.repoProductPostgre.GetByProductID(ctx, stockMovement.ProductID)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get product by id: %w", err)
 		}
 
-		// 2. get product quantity from nearest warehouse
-		for _, nearWarehouse := range nearestWarehouses {
-			if remainingQuantity <= 0 {
-				break
-			}
+		var totalProductQuantity int64
+		for _, product := range products {
+			totalProductQuantity += product.ProductQuantity
+		}
+		if totalProductQuantity < stockMovement.Quantity {
+			return fmt.Errorf("product quantity is not enough")
+		}
 
-			// skip inital warehouse
-			if nearWarehouse.WarehouseID == stockMovement.FromWarehouseID.String() {
-				continue
-			}
+		// get product stock
+		product, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, stockMovement.FromWarehouseID)
+		if err != nil {
+			return fmt.Errorf("failed to get product by id and warehouse id: %w", err)
+		}
 
-			warehouseUUID := uuid.MustParse(nearWarehouse.WarehouseID)
-			nearestProduct, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, warehouseUUID)
+		err = stockMovement.GenerateStockMovementID()
+		if err != nil {
+			return fmt.Errorf("failed to generate stock movement id: %w", err)
+		}
+
+		quantityFromInitial := math.Min(float64(product.ProductQuantity), float64(stockMovement.Quantity))
+		stockMovements = append(stockMovements, &entity.StockMovement{
+			ID:              stockMovement.ID,
+			ProductID:       stockMovement.ProductID,
+			ProductName:     product.ProductName,
+			Quantity:        int64(quantityFromInitial),
+			FromWarehouseID: stockMovement.FromWarehouseID,
+			ToUserID:        stockMovement.ToUserID,
+			CreatedAt:       stockMovement.CreatedAt,
+		})
+
+		// get remaining quantity from nearest warehouse
+		remainingQuantity := stockMovement.Quantity - int64(quantityFromInitial)
+		if remainingQuantity > 0 {
+			// 1. get from nearest warehouse -> using redis rank
+			nearestWarehouses, err := u.repoRedis.GetNearestWarehouses(ctx, stockMovement.FromWarehouseID.String())
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get nearest warehouses: %w", err)
 			}
 
-			// if nearest is empty, skip
-			if nearestProduct.ProductQuantity <= 0 {
-				continue
-			}
+			// 2. get product quantity from nearest warehouse
+			for _, nearWarehouse := range nearestWarehouses {
+				if remainingQuantity <= 0 {
+					break
+				}
 
-			quantityFromWarehouse := math.Min(float64(nearestProduct.ProductQuantity), float64(remainingQuantity))
+				// skip inital warehouse
+				if nearWarehouse.WarehouseID == stockMovement.FromWarehouseID.String() {
+					continue
+				}
 
-			id, err := uuid.NewV7()
-			if err != nil {
-				return err
+				warehouseUUID := uuid.MustParse(nearWarehouse.WarehouseID)
+				nearestProduct, err := u.repoProductPostgre.GetByProductIDAndWarehouseID(ctx, stockMovement.ProductID, warehouseUUID)
+				if err != nil {
+					return fmt.Errorf("failed to get product by id and warehouse id: %w", err)
+				}
+
+				// if nearest is empty, skip
+				if nearestProduct.ProductQuantity <= 0 {
+					continue
+				}
+
+				quantityFromWarehouse := math.Min(float64(nearestProduct.ProductQuantity), float64(remainingQuantity))
+
+				otherStockMovement := &entity.StockMovement{
+					ProductID:       stockMovement.ProductID,
+					ProductName:     stockMovement.ProductName,
+					Quantity:        int64(quantityFromWarehouse),
+					FromWarehouseID: warehouseUUID,
+					ToUserID:        stockMovement.ToUserID,
+					CreatedAt:       stockMovement.CreatedAt,
+				}
+				err = otherStockMovement.GenerateStockMovementID()
+				if err != nil {
+					return fmt.Errorf("failed to generate stock movement id: %w", err)
+				}
+				stockMovements = append(stockMovements, otherStockMovement)
+				remainingQuantity -= int64(quantityFromWarehouse)
 			}
-			tmpStockMovement := &entity.StockMovement{
-				ID:              id,
-				ProductID:       stockMovement.ProductID,
-				ProductName:     stockMovement.ProductName,
-				Quantity:        int64(quantityFromWarehouse),
-				FromWarehouseID: warehouseUUID,
-				ToUserID:        stockMovement.ToUserID,
-				CreatedAt:       stockMovement.CreatedAt,
-			}
-			stockMovements = append(stockMovements, tmpStockMovement)
-			remainingQuantity -= int64(quantityFromWarehouse)
 		}
 	}
 

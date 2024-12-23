@@ -69,11 +69,12 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 }
 
 type createStockMovementOut struct {
-	ProductID       uuid.UUID `json:"product_id"`
-	ProductName     string    `json:"product_name"`
-	Quantity        int64     `json:"quantity"`
-	FromWarehouseID uuid.UUID `json:"from_warehouse_id"`
-	ToUserID        uuid.UUID `json:"to_user_id"`
+	Items []itemStockMovementOut `json:"items"`
+}
+
+type itemStockMovementOut struct {
+	ProductID uuid.UUID `json:"product_id"`
+	Quantity  int64     `json:"quantity"`
 }
 
 func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
@@ -84,16 +85,23 @@ func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
 		return
 	}
 
-	stockMovement := createStockMovementOutRequestToStockMovementEntity(req)
+	userID, exist := ctx.Get(UserIDKey)
+	if !exist {
+		r.l.Error("not exist", "http - v1 - stockMovementRoutes - createStockMovementOut")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError("user id not exist"))
+		return
+	}
 
-	err := r.uct.MoveOut(ctx.Request.Context(), &stockMovement)
+	stockMovements := createStockMovementOutRequestToStockMovementEntity(req, userID.(uuid.UUID))
+
+	err := r.uct.MoveOut(ctx.Request.Context(), stockMovements)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, newCreateSuccess(stockMovement))
+	ctx.JSON(http.StatusCreated, newCreateSuccess(stockMovements))
 }
 
 func (r *stockMovementRoutes) getAllStockMovements(ctx *gin.Context) {
