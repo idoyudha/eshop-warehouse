@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 	"github.com/idoyudha/eshop-warehouse/internal/utils"
@@ -64,6 +65,7 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementRe
 		}
 
 		nearestWarehouseIDs, err := utils.FindNearestWarehouse(zipCode, warehouses, stockMovement.Quantity)
+		log.Println("nearestWarehouseIDs", nearestWarehouseIDs)
 		if err != nil {
 			return fmt.Errorf("failed to calculate nearest warehouse: %w", err)
 		}

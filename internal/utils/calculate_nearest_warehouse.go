@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 
@@ -13,7 +14,7 @@ import (
 func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressAndProductQty, requestQty int64) (map[uuid.UUID]int64, error) {
 	zipCodeNumber, err := strconv.Atoi(zipcode)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid zipCodeNumber: %w", err)
 	}
 
 	type warehouseEntry struct {
@@ -25,7 +26,7 @@ func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressA
 	for _, warehouse := range warehouses {
 		warehouseZipCode, err := strconv.Atoi(warehouse.ZipCode)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("invalid warehouseZipCode: %w", err)
 		}
 		entries = append(entries, warehouseEntry{id: warehouse.WarehouseID, distance: abs(zipCodeNumber - warehouseZipCode)})
 	}

@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -70,21 +69,14 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 }
 
 type createStockMovementOut struct {
-	Items   []itemStockMovementOut `json:"items"`
-	Address addressMovementOut     `json:"address"`
+	Items   []itemStockMovementOut `json:"items" binding:"required"`
+	ZipCode string                 `json:"zipcode" binding:"required"`
 }
 
 type itemStockMovementOut struct {
-	ProductID uuid.UUID `json:"product_id"`
-	Quantity  int64     `json:"quantity"`
-	Price     float64   `json:"price"`
-}
-
-type addressMovementOut struct {
-	Street  string `json:"street"`
-	City    string `json:"city"`
-	State   string `json:"state"`
-	ZipCode string `json:"zipcode"`
+	ProductID uuid.UUID `json:"product_id" binding:"required"`
+	Quantity  int64     `json:"quantity" binding:"required"`
+	Price     float64   `json:"price" binding:"required"`
 }
 
 func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
@@ -94,7 +86,7 @@ func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
 		return
 	}
-	log.Println("req", req)
+
 	userID, exist := ctx.Get(UserIDKey)
 	if !exist {
 		r.l.Error("not exist", "http - v1 - stockMovementRoutes - createStockMovementOut")
@@ -103,8 +95,7 @@ func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
 	}
 
 	stockMovements := createStockMovementOutRequestToStockMovementEntity(req, userID.(uuid.UUID))
-
-	err := r.uct.MoveOut(ctx.Request.Context(), stockMovements, req.Address.ZipCode)
+	err := r.uct.MoveOut(ctx.Request.Context(), stockMovements, req.ZipCode)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
