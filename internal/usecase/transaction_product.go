@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 	"github.com/idoyudha/eshop-warehouse/internal/utils"
@@ -55,31 +54,24 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementRe
 		if err != nil {
 			return fmt.Errorf("failed to get warehouse id and zip code by product id: %w", err)
 		}
-
-		var totalProductQuantity int64
-		for _, warehouse := range warehouses {
-			totalProductQuantity += warehouse.ProductQuantity
-		}
-		if totalProductQuantity < stockMovement.Quantity {
-			return fmt.Errorf("%s requested product quantity is not enough", warehouses[0].ProductName)
-		}
-
 		nearestWarehouseIDs, err := utils.FindNearestWarehouse(zipCode, warehouses, stockMovement.Quantity)
-		log.Println("nearestWarehouseIDs", nearestWarehouseIDs)
 		if err != nil {
 			return fmt.Errorf("failed to calculate nearest warehouse: %w", err)
 		}
 
 		for warehouseID, quantity := range nearestWarehouseIDs {
-			stockMovements = append(stockMovements, &entity.StockMovement{
-				ID:              stockMovement.ID,
-				ProductID:       stockMovement.ProductID,
-				ProductName:     stockMovement.ProductName,
-				Quantity:        quantity,
-				FromWarehouseID: warehouseID,
-				ToUserID:        stockMovement.ToUserID,
-				CreatedAt:       stockMovement.CreatedAt,
-			})
+			var newStockMovement entity.StockMovement
+			err = newStockMovement.GenerateStockMovementID()
+			if err != nil {
+				return fmt.Errorf("failed to generate stock movement id: %w", err)
+			}
+			newStockMovement.ProductID = stockMovement.ProductID
+			newStockMovement.ProductName = stockMovement.ProductName
+			newStockMovement.Quantity = quantity
+			newStockMovement.FromWarehouseID = warehouseID
+			newStockMovement.ToUserID = stockMovement.ToUserID
+			newStockMovement.CreatedAt = stockMovement.CreatedAt
+			stockMovements = append(stockMovements, &newStockMovement)
 		}
 	}
 

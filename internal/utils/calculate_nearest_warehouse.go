@@ -22,13 +22,18 @@ func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressA
 		distance int
 		quantity int64
 	}
+
 	entries := make([]warehouseEntry, 0, len(warehouses))
 	for _, warehouse := range warehouses {
 		warehouseZipCode, err := strconv.Atoi(warehouse.ZipCode)
 		if err != nil {
 			return nil, fmt.Errorf("invalid warehouseZipCode: %w", err)
 		}
-		entries = append(entries, warehouseEntry{id: warehouse.WarehouseID, distance: abs(zipCodeNumber - warehouseZipCode)})
+		entries = append(entries, warehouseEntry{
+			id:       warehouse.WarehouseID,
+			distance: abs(zipCodeNumber - warehouseZipCode),
+			quantity: warehouse.ProductQuantity,
+		})
 	}
 
 	// sort by distance value of warehouseDistance
@@ -44,6 +49,10 @@ func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressA
 		}
 		result[entry.id] = min(entry.quantity, requestQty-countLeft)
 		countLeft += result[entry.id]
+	}
+
+	if countLeft < requestQty {
+		return nil, fmt.Errorf("not enough product quantity")
 	}
 
 	return result, nil
