@@ -52,7 +52,7 @@ func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressA
 	}
 
 	if countLeft < requestQty {
-		return nil, fmt.Errorf("not enough product quantity")
+		return nil, fmt.Errorf("not enough product quantity with total quantity %d", requestQty)
 	}
 
 	return result, nil
