@@ -75,5 +75,8 @@ func NewKafkaConsumer(brokerURL string) (*ConsumerServer, error) {
 }
 
 func (c *ConsumerServer) Close() error {
-	return c.Consumer.Close()
+	if c.Consumer != nil {
+		return c.Consumer.Close()
+	}
+	return nil
 }
