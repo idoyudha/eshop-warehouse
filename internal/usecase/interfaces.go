@@ -31,6 +31,7 @@ type (
 		GetByWarehouseID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
 		GetByProductIDAndWarehouseID(context.Context, uuid.UUID, uuid.UUID) (*entity.WarehouseProduct, error)
 		GetWarehouseIDZipCodeAndQtyByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseAddressAndProductQty, error)
+		GetTotalQuantityOfProductInAllWarehouse(context.Context, uuid.UUID) (int, error)
 	}
 
 	StockMovementPostgreRepo interface {

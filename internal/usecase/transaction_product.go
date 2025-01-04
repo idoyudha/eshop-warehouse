@@ -4,25 +4,32 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 	"github.com/idoyudha/eshop-warehouse/internal/utils"
+	"github.com/idoyudha/eshop-warehouse/pkg/kafka"
 )
+
+const productQuantityUpdated = "product-quantity-updated"
 
 type TransactionProductUseCase struct {
 	repoRedis              WarehouseRankRedisRepo
 	repoTransactionPostgre TransactionProductPostgresRepo
 	repoProductPostgre     WarehouseProductPostgreRepo
+	producer               *kafka.ProducerServer
 }
 
 func NewTransactionProductUseCase(
 	repoRedis WarehouseRankRedisRepo,
 	repoTransactionPostgre TransactionProductPostgresRepo,
 	repoProductPostgre WarehouseProductPostgreRepo,
+	producer *kafka.ProducerServer,
 ) *TransactionProductUseCase {
 	return &TransactionProductUseCase{
 		repoRedis,
 		repoTransactionPostgre,
 		repoProductPostgre,
+		producer,
 	}
 }
 
@@ -44,10 +51,23 @@ func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *e
 	return u.repoTransactionPostgre.TransferIn(ctx, stockMovement)
 }
 
+type kafkaProductQuantityUpdatedMessage struct {
+	ProductID uuid.UUID
+	Quantity  int
+}
+
 // move from warehouse to user
 func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementReq []*entity.StockMovement, zipCode string) error {
 	var stockMovements []*entity.StockMovement
 	for _, stockMovement := range stockMovementReq {
+		totalProduct, err := u.repoProductPostgre.GetTotalQuantityOfProductInAllWarehouse(ctx, stockMovement.ProductID)
+		if err != nil {
+			return fmt.Errorf("failed to get total quantity of product in all warehouse: %w", err)
+		}
+
+		if totalProduct < int(stockMovement.Quantity) {
+			return fmt.Errorf("product quantity is not enough")
+		}
 		// find the nearest warehouse and remaining product quantity for each warehouse
 		// TODO: can be improved if we get from in memory database (redis)
 		warehouses, err := u.repoProductPostgre.GetWarehouseIDZipCodeAndQtyByProductID(ctx, stockMovement.ProductID)
@@ -74,7 +94,20 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementRe
 			stockMovements = append(stockMovements, &newStockMovement)
 		}
 
-		// TODO: update product stock in product service
+		message := kafkaProductQuantityUpdatedMessage{
+			ProductID: stockMovement.ProductID,
+			Quantity:  totalProduct - int(stockMovement.Quantity),
+		}
+
+		err = u.producer.Produce(
+			productQuantityUpdated,
+			[]byte(stockMovement.ProductID.String()),
+			message,
+		)
+		if err != nil {
+			// TODO: handle error, cancel the update if failed. or try use retry mechanism
+			return fmt.Errorf("failed to produce kafka message: %w", err)
+		}
 	}
 
 	return u.repoTransactionPostgre.TransferOut(ctx, stockMovements)

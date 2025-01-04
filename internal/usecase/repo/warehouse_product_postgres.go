@@ -311,3 +311,23 @@ func (r *WarehouseProductPostgreRepo) GetWarehouseIDZipCodeAndQtyByProductID(ctx
 
 	return warehouseAndProducts, nil
 }
+
+const queryGetTotalQuantityOfProductInAllWarehouse = `
+	SELECT SUM(product_quantity) FROM warehouse_products WHERE product_id = $1 AND deleted_at IS NULL;
+`
+
+func (r *WarehouseProductPostgreRepo) GetTotalQuantityOfProductInAllWarehouse(ctx context.Context, productID uuid.UUID) (int, error) {
+	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetTotalQuantityOfProductInAllWarehouse)
+	if errStmt != nil {
+		return 0, errStmt
+	}
+	defer stmt.Close()
+
+	var totalQuantity int
+	err := stmt.QueryRowContext(ctx, productID).Scan(&totalQuantity)
+	if err != nil {
+		return 0, err
+	}
+
+	return totalQuantity, nil
+}
