@@ -1,0 +1,9 @@
+app:
+  name: 'github.com/idoyudha/eshop-warehouse'
+  version: '1.0.0'
+
+http:
+  port: '2005'
+
+log:
+  level: 'debug'
