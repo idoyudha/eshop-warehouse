@@ -73,6 +73,8 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementRe
 			newStockMovement.CreatedAt = stockMovement.CreatedAt
 			stockMovements = append(stockMovements, &newStockMovement)
 		}
+
+		// TODO: update product stock in product service
 	}
 
 	return u.repoTransactionPostgre.TransferOut(ctx, stockMovements)

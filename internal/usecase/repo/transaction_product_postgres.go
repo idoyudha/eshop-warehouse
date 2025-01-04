@@ -23,7 +23,7 @@ func NewTransactionProductPostgreRepo(client *postgresql.Postgres) *TransactionP
 const (
 	// locks the rows with FOR UPDATE
 	queryLockSourceProduct = `
-		SELECT id, product_sku, product_image_url, product_description, product_price, product_category_id 
+		SELECT id, product_sku, product_image_url, product_description, product_price, product_category_id, product_quantity 
 		FROM warehouse_products 
 		WHERE product_id = $1 
 		AND warehouse_id = $2 
@@ -105,6 +105,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 		&whSrcProduct.ProductDescription,
 		&whSrcProduct.ProductPrice,
 		&whSrcProduct.ProductCategoryID,
+		&whSrcProduct.ProductQuantity,
 	); err != nil {
 		return fmt.Errorf("failed to lock source product: %w", err)
 	}
@@ -121,10 +122,18 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	}
 
 	// 3. update source quantity
-	_, err = tx.ExecContext(ctx, queryUpdateSourceQuantity,
+	res, err := tx.ExecContext(ctx, queryUpdateSourceQuantity,
 		stockMovement.Quantity, stockMovement.CreatedAt, stockMovement.ProductID, stockMovement.FromWarehouseID)
 	if err != nil {
 		return fmt.Errorf("failed to update source quantity: %w", err)
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("source product not found")
 	}
 
 	// 4. handle destination product
@@ -218,6 +227,7 @@ func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockM
 			&whSrcProduct.ProductDescription,
 			&whSrcProduct.ProductPrice,
 			&whSrcProduct.ProductCategoryID,
+			&whSrcProduct.ProductQuantity,
 		); err != nil {
 			return fmt.Errorf("failed to lock source product: %w", err)
 		}
