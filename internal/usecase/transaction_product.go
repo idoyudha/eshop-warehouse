@@ -52,8 +52,8 @@ func (u *TransactionProductUseCase) MoveIn(ctx context.Context, stockMovement *e
 }
 
 type kafkaProductQuantityUpdatedMessage struct {
-	ProductID uuid.UUID
-	Quantity  int
+	ProductID uuid.UUID `json:"product_id"`
+	Quantity  int       `json:"quantity"`
 }
 
 // move from warehouse to user
