@@ -9,7 +9,37 @@ import (
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 )
 
-func FindNearestWarehouse(zipCode string, warehouses []*entity.Warehouse) (string, error) {
+func FindNearestWarehouseByProductID(zipCode string, warehouse []*entity.WarehouseAddressAndProductQty) (string, error) {
+	zipCodeNumber, err := strconv.Atoi(zipCode)
+	if err != nil {
+		return "", fmt.Errorf("invalid zipCodeNumber: %w", err)
+	}
+
+	type warehouseEntry struct {
+		zipCode  string
+		distance int
+	}
+	entries := make([]warehouseEntry, 0, len(warehouse))
+	for _, warehouse := range warehouse {
+		warehouseZipCode, err := strconv.Atoi(warehouse.ZipCode)
+		if err != nil {
+			return "", fmt.Errorf("invalid warehouseZipCode: %w", err)
+		}
+		entries = append(entries, warehouseEntry{
+			zipCode:  warehouse.ZipCode,
+			distance: abs(zipCodeNumber - warehouseZipCode),
+		})
+	}
+
+	// sort by distance value of warehouseDistance
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].distance < entries[j].distance
+	})
+
+	return entries[0].zipCode, nil
+}
+
+func FindNearestWarehouseByZipCode(zipCode string, warehouses []*entity.Warehouse) (string, error) {
 	zipCodeNumber, err := strconv.Atoi(zipCode)
 	if err != nil {
 		return "", fmt.Errorf("invalid zipCodeNumber: %w", err)

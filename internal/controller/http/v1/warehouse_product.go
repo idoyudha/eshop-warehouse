@@ -28,6 +28,7 @@ func newWarehouseProductRoutes(
 		h.GET("/product/:product_id", r.getWarehouseProductByProductID)
 		h.GET("/warehouse/:warehouse_id", r.getWarehouseProductByWarehouseID)
 		h.GET("/product/:product_id/warehouse/:warehouse_id", r.getWarehouseProductByProductIDAndWarehouseID)
+		h.POST("/nearest", r.getNearestWarehouseZipCode)
 	}
 }
 
@@ -101,4 +102,34 @@ func (r *warehouseProductRoutes) getWarehouseProductByProductIDAndWarehouseID(ct
 	}
 
 	ctx.JSON(http.StatusOK, newGetSuccess(products))
+}
+
+type getNearestWarehouseZipCodeAndProductIDRequest struct {
+	ZipCode   string    `json:"zip_code"`
+	ProductID uuid.UUID `json:"product_id"`
+}
+
+type getNearestWarehouseZipCodeAndProductIDResponse struct {
+	ZipCode *string `json:"zip_code"`
+}
+
+func (r *warehouseProductRoutes) getNearestWarehouseZipCode(ctx *gin.Context) {
+	var req getNearestWarehouseZipCodeAndProductIDRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getNearestWarehouseZipCode")
+		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
+		return
+	}
+
+	warehouse, err := r.uc.GetNearestWarehouseZipCodeByProductID(ctx.Request.Context(), req.ZipCode, req.ProductID)
+	if err != nil {
+		r.l.Error(err, "http - v1 - warehouseProductRoutes - getNearestWarehouseZipCode")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	var res getNearestWarehouseZipCodeAndProductIDResponse
+	res.ZipCode = warehouse
+
+	ctx.JSON(http.StatusOK, newGetSuccess(res))
 }

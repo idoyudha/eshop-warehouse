@@ -63,6 +63,7 @@ type (
 		GetWarehouseProductByProductID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
 		GetWarehouseProductByWarehouseID(context.Context, uuid.UUID) ([]*entity.WarehouseProduct, error)
 		GetWarehouseProductByProductIDAndWarehouseID(context.Context, uuid.UUID, uuid.UUID) (*entity.WarehouseProduct, error)
+		GetNearestWarehouseZipCodeByProductID(context.Context, string, uuid.UUID) (*string, error)
 	}
 
 	StockMovement interface {

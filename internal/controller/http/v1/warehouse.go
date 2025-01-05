@@ -158,6 +158,10 @@ type getNearestWarehouseRequest struct {
 	ZipCodes []string `json:"zip_codes" binding:"required"`
 }
 
+type getNearestWarehouseResponse struct {
+	Warehouses map[string]string `json:"warehouses"`
+}
+
 func (r *warehouseRoutes) getNearestWarehouse(ctx *gin.Context) {
 	var req getNearestWarehouseRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -173,5 +177,11 @@ func (r *warehouseRoutes) getNearestWarehouse(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newGetSuccess(nearestWarehouse))
+	var res getNearestWarehouseResponse
+	res.Warehouses = make(map[string]string)
+	for zipCodeFrom, zipCodeTo := range nearestWarehouse {
+		res.Warehouses[zipCodeFrom] = zipCodeTo
+	}
+
+	ctx.JSON(http.StatusOK, newGetSuccess(res))
 }

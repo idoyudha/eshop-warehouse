@@ -121,7 +121,7 @@ func (u *WarehouseUseCase) GetNearestWarehouse(ctx context.Context, zipCodes []s
 
 	result := make(map[string]string)
 	for _, zipCode := range zipCodes {
-		nearest, err := utils.FindNearestWarehouse(zipCode, idAndZipCodes)
+		nearest, err := utils.FindNearestWarehouseByZipCode(zipCode, idAndZipCodes)
 		if err != nil {
 			return nil, err
 		}
