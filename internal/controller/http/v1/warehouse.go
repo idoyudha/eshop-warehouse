@@ -23,6 +23,7 @@ func newWarehouseRoutes(handler *gin.RouterGroup, uc usecase.Warehouse, l logger
 		h.GET("", r.getAllWarehouses)
 		h.GET("/:id", r.getWarehouseByID)
 		h.PATCH("/:id", r.updateWarehouse)
+		h.POST("/nearest", r.getNearestWarehouse)
 	}
 }
 
@@ -151,4 +152,26 @@ func (r *warehouseRoutes) getAllWarehouses(ctx *gin.Context) {
 	warehousesResponse := warehouseEntitiesToGetAllWarehouseResponse(warehouses)
 
 	ctx.JSON(http.StatusOK, newGetSuccess(warehousesResponse))
+}
+
+type getNearestWarehouseRequest struct {
+	ZipCodes []string `json:"zip_codes" binding:"required"`
+}
+
+func (r *warehouseRoutes) getNearestWarehouse(ctx *gin.Context) {
+	var req getNearestWarehouseRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
+		ctx.JSON(http.StatusBadRequest, newBadRequestError(err.Error()))
+		return
+	}
+
+	nearestWarehouse, err := r.uc.GetNearestWarehouse(ctx.Request.Context(), req.ZipCodes)
+	if err != nil {
+		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
+		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, newGetSuccess(nearestWarehouse))
 }

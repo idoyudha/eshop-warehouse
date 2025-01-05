@@ -19,7 +19,7 @@ type (
 		GetAll(context.Context) ([]*entity.Warehouse, error)
 		GetAllExceptMain(context.Context) ([]*entity.Warehouse, error)
 		GetMainID(context.Context) (uuid.UUID, error)
-		// GetAllIDAndZipCode(context.Context) ([]*entity.Warehouse, error)
+		GetAllIDAndZipCode(context.Context) ([]*entity.Warehouse, error)
 	}
 
 	WarehouseProductPostgreRepo interface {
@@ -52,6 +52,7 @@ type (
 		GetWarehouseByID(context.Context, uuid.UUID) (*entity.Warehouse, error)
 		GetAllWarehouses(context.Context) ([]*entity.Warehouse, error)
 		GetMainIDWarehouse(context.Context) (uuid.UUID, error)
+		GetNearestWarehouse(context.Context, []string) (map[string]string, error)
 	}
 
 	WarehouseProduct interface {

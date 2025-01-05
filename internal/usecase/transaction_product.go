@@ -74,7 +74,7 @@ func (u *TransactionProductUseCase) MoveOut(ctx context.Context, stockMovementRe
 		if err != nil {
 			return fmt.Errorf("failed to get warehouse id and zip code by product id: %w", err)
 		}
-		nearestWarehouseIDs, err := utils.FindNearestWarehouse(zipCode, warehouses, stockMovement.Quantity)
+		nearestWarehouseIDs, err := utils.FindNearestWarehouseWithQty(zipCode, warehouses, stockMovement.Quantity)
 		if err != nil {
 			return fmt.Errorf("failed to calculate nearest warehouse: %w", err)
 		}
