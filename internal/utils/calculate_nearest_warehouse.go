@@ -9,9 +9,69 @@ import (
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 )
 
+func FindNearestWarehouseByProductID(zipCode string, warehouse []*entity.WarehouseAddressAndProductQty) (string, error) {
+	zipCodeNumber, err := strconv.Atoi(zipCode)
+	if err != nil {
+		return "", fmt.Errorf("invalid zipCodeNumber: %w", err)
+	}
+
+	type warehouseEntry struct {
+		zipCode  string
+		distance int
+	}
+	entries := make([]warehouseEntry, 0, len(warehouse))
+	for _, warehouse := range warehouse {
+		warehouseZipCode, err := strconv.Atoi(warehouse.ZipCode)
+		if err != nil {
+			return "", fmt.Errorf("invalid warehouseZipCode: %w", err)
+		}
+		entries = append(entries, warehouseEntry{
+			zipCode:  warehouse.ZipCode,
+			distance: abs(zipCodeNumber - warehouseZipCode),
+		})
+	}
+
+	// sort by distance value of warehouseDistance
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].distance < entries[j].distance
+	})
+
+	return entries[0].zipCode, nil
+}
+
+func FindNearestWarehouseByZipCode(zipCode string, warehouses []*entity.Warehouse) (string, error) {
+	zipCodeNumber, err := strconv.Atoi(zipCode)
+	if err != nil {
+		return "", fmt.Errorf("invalid zipCodeNumber: %w", err)
+	}
+
+	type warehouseEntry struct {
+		zipCode  string
+		distance int
+	}
+	entries := make([]warehouseEntry, 0, len(warehouses))
+	for _, warehouse := range warehouses {
+		warehouseZipCode, err := strconv.Atoi(warehouse.ZipCode)
+		if err != nil {
+			return "", fmt.Errorf("invalid warehouseZipCode: %w", err)
+		}
+		entries = append(entries, warehouseEntry{
+			zipCode:  warehouse.ZipCode,
+			distance: abs(zipCodeNumber - warehouseZipCode),
+		})
+	}
+
+	// sort by distance value of warehouseDistance
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].distance < entries[j].distance
+	})
+
+	return entries[0].zipCode, nil
+}
+
 // find nearest warehouse by zipcode
 // returned warehouse id with nearest distance (zipcode difference) ascending
-func FindNearestWarehouse(zipcode string, warehouses []*entity.WarehouseAddressAndProductQty, requestQty int64) (map[uuid.UUID]int64, error) {
+func FindNearestWarehouseWithQty(zipcode string, warehouses []*entity.WarehouseAddressAndProductQty, requestQty int64) (map[uuid.UUID]int64, error) {
 	zipCodeNumber, err := strconv.Atoi(zipcode)
 	if err != nil {
 		return nil, fmt.Errorf("invalid zipCodeNumber: %w", err)

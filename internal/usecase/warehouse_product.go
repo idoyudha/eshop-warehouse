@@ -2,9 +2,11 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
+	"github.com/idoyudha/eshop-warehouse/internal/utils"
 )
 
 type WarehouseProductUseCase struct {
@@ -48,4 +50,18 @@ func (u *WarehouseProductUseCase) GetWarehouseProductByWarehouseID(ctx context.C
 
 func (u *WarehouseProductUseCase) GetWarehouseProductByProductIDAndWarehouseID(ctx context.Context, productID uuid.UUID, warehouseID uuid.UUID) (*entity.WarehouseProduct, error) {
 	return u.repoPostgre.GetByProductIDAndWarehouseID(ctx, productID, warehouseID)
+}
+
+func (u *WarehouseProductUseCase) GetNearestWarehouseZipCodeByProductID(ctx context.Context, zipCode string, productID uuid.UUID) (*string, error) {
+	warehouse, err := u.repoPostgre.GetWarehouseIDZipCodeAndQtyByProductID(ctx, productID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get warehouse and zipcode data: %w", err)
+	}
+
+	zipCodeRes, err := utils.FindNearestWarehouseByProductID(zipCode, warehouse)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find nearest warehouse: %w", err)
+	}
+
+	return &zipCodeRes, nil
 }
