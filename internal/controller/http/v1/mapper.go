@@ -91,6 +91,7 @@ func createStockMovementOutRequestToStockMovementEntity(req createStockMovementO
 			ProductID: stockMovement.ProductID,
 			Quantity:  stockMovement.Quantity,
 			ToUserID:  userID,
+			CreatedAt: time.Now(),
 		})
 	}
 

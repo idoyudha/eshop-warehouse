@@ -111,3 +111,23 @@ func (u *WarehouseUseCase) GetAllWarehouses(ctx context.Context) ([]*entity.Ware
 func (u *WarehouseUseCase) GetMainIDWarehouse(ctx context.Context) (uuid.UUID, error) {
 	return u.repoPostgre.GetMainID(ctx)
 }
+
+// return nearest warehouse of zipcodes
+func (u *WarehouseUseCase) GetNearestWarehouse(ctx context.Context, zipCodes []string) (map[string]string, error) {
+	idAndZipCodes, err := u.repoPostgre.GetAllIDAndZipCode(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string)
+	for _, zipCode := range zipCodes {
+		nearest, err := utils.FindNearestWarehouseByZipCode(zipCode, idAndZipCodes)
+		if err != nil {
+			return nil, err
+		}
+
+		result[zipCode] = nearest
+	}
+
+	return result, nil
+}
