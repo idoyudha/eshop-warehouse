@@ -8,28 +8,28 @@ This service handles user warehouse operations as usual create, read, update, an
 ```
 eshop-auth
 ├── .github/
-│   └── workflows/
+│   └── workflows/     # github workflows to automatically test, build, and push
 ├── cmd/
-│   └── app/
-├── config/
+│   └── app/            # configuration and log initialization
+├── config/             # configuration
 ├── internal/   
-│   ├── app/
-│   ├── controller/
+│   ├── app/            # one run function in the `app.go`
+│   ├── controller/     # serve handler layer
 │   │   ├── http/
-│   │   |   └── v1/
+│   │   |   └── v1/     # rest http
 │   │   └── kafka
-│   │       └── v1/
-│   ├── entity/
-│   ├── usecase/
-│   │   └── repo/
-│   └── utils/
-├── migrations/
+│   │       └── v1/     # kafka subscriber
+│   ├── entity/         # entities of business logic (models) can be used in any layer
+│   ├── usecase/        # business logic
+│   │   └── repo/       # abstract storage (database) that business logic works with
+│   └── utils/          # helpers function
+├── migrations/         # sql migration
 └── pkg/
-    ├── httpserver/
-    ├── kafka/
-    ├── logger/
-    ├── postgresql/
-    └── redis/
+    ├── httpserver/     # http server initialization
+    ├── kafka/          # kafka initialization
+    ├── logger/         # logger initialization
+    ├── postgresql/     # postgresql initialization
+    └── redis/          # redis initialization
 ```
 
 ## Tech Stack
