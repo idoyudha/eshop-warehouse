@@ -68,7 +68,7 @@ func TestGetAllStockMovements(t *testing.T) {
 			name: "success",
 			mock: func(repo *MockStockMovementPostgreRepo) {
 				repo.EXPECT().
-					GetAll(gomock.Any()).
+					GetAll(context.Background()).
 					Return(mockStockMovements, nil)
 			},
 			res: mockStockMovements,
@@ -78,7 +78,7 @@ func TestGetAllStockMovements(t *testing.T) {
 			name: "error",
 			mock: func(repo *MockStockMovementPostgreRepo) {
 				repo.EXPECT().
-					GetAll(gomock.Any()).
+					GetAll(context.Background()).
 					Return(nil, errInternalServerError)
 			},
 			res: nil,
@@ -122,6 +122,66 @@ func TestGetAllStockMovements(t *testing.T) {
 	}
 }
 
-// func TestGetByProductID(t *testing.T) {
-// 	stockMovement, repo := stockMovement(t)
-// }
+func TestGetByProductID(t *testing.T) {
+	// allow this function run in parallel with other test function
+	t.Parallel()
+	productID := uuid.New()
+
+	tests := []TestStockMovement{
+		{
+			name: "success",
+			mock: func(repo *MockStockMovementPostgreRepo) {
+				repo.EXPECT().
+					GetByProductID(context.Background(), productID).
+					Return(mockStockMovements, nil)
+			},
+			res: mockStockMovements,
+			err: nil,
+		},
+		{
+			name: "error",
+			mock: func(repo *MockStockMovementPostgreRepo) {
+				repo.EXPECT().
+					GetByProductID(context.Background(), productID).
+					Return(nil, errInternalServerError)
+			},
+			res: nil,
+			err: errInternalServerError,
+		},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			// test case will run in parallel
+			t.Parallel()
+			mockCtl := gomock.NewController(t)
+			defer mockCtl.Finish()
+
+			repo := NewMockStockMovementPostgreRepo(mockCtl)
+			stockMovement := usecase.NewStockMovementUseCase(repo)
+
+			tc.mock(repo)
+			res, err := stockMovement.GetStockMovementsByProductID(context.Background(), productID)
+
+			assert.Equal(t, tc.err, err)
+			if err == nil {
+				assert.NotNil(t, res)
+				assert.Equal(t, tc.res, res)
+				assert.Equal(t, len(tc.res), len(res))
+				for i := 0; i < len(tc.res); i++ {
+					assert.Equal(t, tc.res[i].ID, res[i].ID)
+					assert.Equal(t, tc.res[i].ProductID, res[i].ProductID)
+					assert.Equal(t, tc.res[i].ProductName, res[i].ProductName)
+					assert.Equal(t, tc.res[i].Quantity, res[i].Quantity)
+					assert.Equal(t, tc.res[i].FromWarehouseID, res[i].FromWarehouseID)
+					assert.Equal(t, tc.res[i].ToWarehouseID, res[i].ToWarehouseID)
+					assert.Equal(t, tc.res[i].ToUserID, res[i].ToUserID)
+					assert.Equal(t, tc.res[i].CreatedAt, res[i].CreatedAt)
+				}
+			} else {
+				assert.Nil(t, res)
+			}
+		})
+	}
+}
