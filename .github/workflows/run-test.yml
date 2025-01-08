@@ -20,12 +20,9 @@ jobs:
     - name: Install dependencies
       run: go mod download
 
-    - name: Run tests
-      run: go test -v -cover -race ./internal/...
-
-    - name: Generate coverage report
+    - name: Run tests and get coverage
       run: |
-        go test -coverprofile=coverage.out ./internal/...
+        go test -v -race -coverprofile=coverage.out -coverpkg=./... ./internal/...
         go tool cover -html=coverage.out -o coverage.html
 
     - name: Upload coverage report

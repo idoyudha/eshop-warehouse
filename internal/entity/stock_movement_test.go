@@ -14,13 +14,16 @@ func TestGenerateStockMovementID(t *testing.T) {
 	toWHID, _ := uuid.NewV7()
 	toUserID, _ := uuid.NewV7()
 	tests := []struct {
-		name    string
-		sm      *StockMovement
-		wantErr bool
+		name      string
+		sm        *StockMovement
+		wantErr   bool
+		wantPanic bool
 	}{
 		{
-			name: "generate id for empty stock movement",
-			sm:   &StockMovement{},
+			name:      "generate id for empty stock movement",
+			sm:        &StockMovement{},
+			wantErr:   false,
+			wantPanic: false,
 		},
 		{
 			name: "generate id for filled stock movement",
@@ -33,11 +36,25 @@ func TestGenerateStockMovementID(t *testing.T) {
 				ToUserID:        toUserID,
 				CreatedAt:       time.Now(),
 			},
+			wantErr:   false,
+			wantPanic: false,
+		},
+		{
+			name:      "panic for nil stock movement",
+			sm:        nil,
+			wantPanic: true,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			if tc.wantPanic {
+				assert.Panics(t, func() {
+					_ = tc.sm.GenerateStockMovementID()
+				})
+				return
+			}
+
 			err := tc.sm.GenerateStockMovementID()
 
 			if tc.wantErr {
