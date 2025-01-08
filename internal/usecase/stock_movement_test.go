@@ -42,7 +42,7 @@ var (
 
 type TestStockMovement struct {
 	name string
-	mock func(*MockStockMovementPostgreRepo)
+	mock func()
 	res  []*entity.StockMovement
 	err  error
 }
@@ -62,11 +62,12 @@ func stockMovement(t *testing.T) (*usecase.StockMovementUseCase, *MockStockMovem
 func TestGetAllStockMovements(t *testing.T) {
 	// allow this function run in parallel with other test function
 	t.Parallel()
+	stockMovement, repo := stockMovement(t)
 
 	tests := []TestStockMovement{
 		{
 			name: "success",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetAll(context.Background()).
 					Return(mockStockMovements, nil)
@@ -76,7 +77,7 @@ func TestGetAllStockMovements(t *testing.T) {
 		},
 		{
 			name: "error",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetAll(context.Background()).
 					Return(nil, errInternalServerError)
@@ -91,13 +92,9 @@ func TestGetAllStockMovements(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
 			t.Parallel()
-			mockCtl := gomock.NewController(t)
-			defer mockCtl.Finish()
 
-			repo := NewMockStockMovementPostgreRepo(mockCtl)
-			stockMovement := usecase.NewStockMovementUseCase(repo)
+			tc.mock()
 
-			tc.mock(repo)
 			res, err := stockMovement.GetAllStockMovements(context.Background())
 
 			assert.Equal(t, tc.err, err)
@@ -126,11 +123,12 @@ func TestGetByProductID(t *testing.T) {
 	// allow this function run in parallel with other test function
 	t.Parallel()
 	productID := uuid.New()
+	stockMovement, repo := stockMovement(t)
 
 	tests := []TestStockMovement{
 		{
 			name: "success",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetByProductID(context.Background(), productID).
 					Return(mockStockMovements, nil)
@@ -140,7 +138,7 @@ func TestGetByProductID(t *testing.T) {
 		},
 		{
 			name: "error",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetByProductID(context.Background(), productID).
 					Return(nil, errInternalServerError)
@@ -155,13 +153,8 @@ func TestGetByProductID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
 			t.Parallel()
-			mockCtl := gomock.NewController(t)
-			defer mockCtl.Finish()
 
-			repo := NewMockStockMovementPostgreRepo(mockCtl)
-			stockMovement := usecase.NewStockMovementUseCase(repo)
-
-			tc.mock(repo)
+			tc.mock()
 			res, err := stockMovement.GetStockMovementsByProductID(context.Background(), productID)
 
 			assert.Equal(t, tc.err, err)
@@ -190,11 +183,12 @@ func TestGetStockMovementsBySourceID(t *testing.T) {
 	// allow this function run in parallel with other test function
 	t.Parallel()
 	sourceID := uuid.New()
+	stockMovement, repo := stockMovement(t)
 
 	tests := []TestStockMovement{
 		{
 			name: "success",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetBySourceID(context.Background(), sourceID).
 					Return(mockStockMovements, nil)
@@ -204,7 +198,7 @@ func TestGetStockMovementsBySourceID(t *testing.T) {
 		},
 		{
 			name: "error",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetBySourceID(context.Background(), sourceID).
 					Return(nil, errInternalServerError)
@@ -219,13 +213,8 @@ func TestGetStockMovementsBySourceID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
 			t.Parallel()
-			mockCtl := gomock.NewController(t)
-			defer mockCtl.Finish()
 
-			repo := NewMockStockMovementPostgreRepo(mockCtl)
-			stockMovement := usecase.NewStockMovementUseCase(repo)
-
-			tc.mock(repo)
+			tc.mock()
 			res, err := stockMovement.GetStockMovementsBySourceID(context.Background(), sourceID)
 
 			assert.Equal(t, tc.err, err)
@@ -254,11 +243,12 @@ func TestGetStockMovementsByDestinationID(t *testing.T) {
 	// allow this function run in parallel with other test function
 	t.Parallel()
 	destinationID := uuid.New()
+	stockMovement, repo := stockMovement(t)
 
 	tests := []TestStockMovement{
 		{
 			name: "success",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetByDestinationID(context.Background(), destinationID).
 					Return(mockStockMovements, nil)
@@ -268,7 +258,7 @@ func TestGetStockMovementsByDestinationID(t *testing.T) {
 		},
 		{
 			name: "error",
-			mock: func(repo *MockStockMovementPostgreRepo) {
+			mock: func() {
 				repo.EXPECT().
 					GetByDestinationID(context.Background(), destinationID).
 					Return(nil, errInternalServerError)
@@ -283,13 +273,8 @@ func TestGetStockMovementsByDestinationID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
 			t.Parallel()
-			mockCtl := gomock.NewController(t)
-			defer mockCtl.Finish()
 
-			repo := NewMockStockMovementPostgreRepo(mockCtl)
-			stockMovement := usecase.NewStockMovementUseCase(repo)
-
-			tc.mock(repo)
+			tc.mock()
 			res, err := stockMovement.GetStockMovementsByDestinationID(context.Background(), destinationID)
 
 			assert.Equal(t, tc.err, err)
