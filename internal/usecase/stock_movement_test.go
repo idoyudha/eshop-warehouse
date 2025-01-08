@@ -61,7 +61,7 @@ func stockMovement(t *testing.T) (*usecase.StockMovementUseCase, *MockStockMovem
 
 func TestGetAllStockMovements(t *testing.T) {
 	// allow this function run in parallel with other test function
-	t.Parallel()
+	// t.Parallell()
 	stockMovement, repo := stockMovement(t)
 
 	tests := []TestStockMovement{
@@ -91,7 +91,7 @@ func TestGetAllStockMovements(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 
@@ -121,7 +121,7 @@ func TestGetAllStockMovements(t *testing.T) {
 
 func TestGetByProductID(t *testing.T) {
 	// allow this function run in parallel with other test function
-	t.Parallel()
+	// t.Parallell()
 	productID := uuid.New()
 	stockMovement, repo := stockMovement(t)
 
@@ -152,7 +152,7 @@ func TestGetByProductID(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 			res, err := stockMovement.GetStockMovementsByProductID(context.Background(), productID)
@@ -181,7 +181,7 @@ func TestGetByProductID(t *testing.T) {
 
 func TestGetStockMovementsBySourceID(t *testing.T) {
 	// allow this function run in parallel with other test function
-	t.Parallel()
+	// t.Parallell()
 	sourceID := uuid.New()
 	stockMovement, repo := stockMovement(t)
 
@@ -212,7 +212,7 @@ func TestGetStockMovementsBySourceID(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 			res, err := stockMovement.GetStockMovementsBySourceID(context.Background(), sourceID)
@@ -241,7 +241,7 @@ func TestGetStockMovementsBySourceID(t *testing.T) {
 
 func TestGetStockMovementsByDestinationID(t *testing.T) {
 	// allow this function run in parallel with other test function
-	t.Parallel()
+	// t.Parallell()
 	destinationID := uuid.New()
 	stockMovement, repo := stockMovement(t)
 
@@ -272,7 +272,7 @@ func TestGetStockMovementsByDestinationID(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			// test case will run in parallel
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 			res, err := stockMovement.GetStockMovementsByDestinationID(context.Background(), destinationID)

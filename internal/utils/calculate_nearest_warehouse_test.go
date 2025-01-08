@@ -9,7 +9,7 @@ import (
 )
 
 func TestFindNearestWarehouseByProductID(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouse1ID := uuid.New()
 	warehouse2ID := uuid.New()
 	warehouse3ID := uuid.New()
@@ -54,7 +54,7 @@ func TestFindNearestWarehouseByProductID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 			result, err := FindNearestWarehouseByProductID(tt.zipCode, tt.warehouses)
 
 			if tt.expectError {
@@ -69,7 +69,7 @@ func TestFindNearestWarehouseByProductID(t *testing.T) {
 }
 
 func TestFindNearestWarehouseWithQty(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouse1ID := uuid.New()
 	warehouse2ID := uuid.New()
 	warehouse3ID := uuid.New()
@@ -134,7 +134,7 @@ func TestFindNearestWarehouseWithQty(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 			result, err := FindNearestWarehouseWithQty(tt.zipCode, tt.warehouses, tt.requestQty)
 
 			if tt.expectError {

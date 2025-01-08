@@ -60,7 +60,7 @@ type TestTransferProduct struct {
 
 // func TestMovementIn(t *testing.T) {
 // 	// allow this function run in parallel with other test function
-// 	t.Parallel()
+// 	// t.Parallell()
 
 // 	tests := []TestTransferProduct{
 // 		{
@@ -78,7 +78,7 @@ type TestTransferProduct struct {
 // 		tc := tc
 // 		t.Run(tc.name, func(t *testing.T) {
 // 			// test case will run in parallel
-// 			t.Parallel()
+// 			// t.Parallell()
 // 		})
 // 	}
 // }

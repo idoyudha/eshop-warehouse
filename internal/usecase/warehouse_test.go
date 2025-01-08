@@ -58,7 +58,7 @@ func warehouse(t *testing.T) (*usecase.WarehouseUseCase, *MockWarehouseRankRedis
 }
 
 func TestGetAllWarehouses(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouse, _, repoPostgre := warehouse(t)
 
 	tests := []TestWarehouse{
@@ -87,7 +87,7 @@ func TestGetAllWarehouses(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 
@@ -105,7 +105,7 @@ func TestGetAllWarehouses(t *testing.T) {
 }
 
 func TestGetWarehouseByID(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouse, _, repoPostgre := warehouse(t)
 
 	tests := []TestWarehouse{
@@ -134,7 +134,7 @@ func TestGetWarehouseByID(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 

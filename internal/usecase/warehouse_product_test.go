@@ -63,7 +63,7 @@ func warehouseProduct(t *testing.T) (*usecase.WarehouseProductUseCase, *MockWare
 }
 
 func TestCreateWarehouseProduct(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouseProduct, repo := warehouseProduct(t)
 
 	input := &entity.WarehouseProduct{
@@ -98,7 +98,7 @@ func TestCreateWarehouseProduct(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 
@@ -109,7 +109,7 @@ func TestCreateWarehouseProduct(t *testing.T) {
 }
 
 func TestGetAllWarehouseProducts(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouseProduct, repo := warehouseProduct(t)
 
 	tests := []TestWarehouseProduct{
@@ -138,7 +138,7 @@ func TestGetAllWarehouseProducts(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 
@@ -165,7 +165,7 @@ func TestGetAllWarehouseProducts(t *testing.T) {
 }
 
 func TestGetNearestWarehouseZipCodeByProductID(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	warehouseProduct, repo := warehouseProduct(t)
 
 	inputZipCode := "12345"
@@ -206,7 +206,7 @@ func TestGetNearestWarehouseZipCodeByProductID(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			tc.mock()
 

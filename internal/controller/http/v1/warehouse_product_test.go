@@ -75,7 +75,7 @@ func (m *mockWarehouseProductUsecase) GetNearestWarehouseZipCodeByProductID(ctx 
 }
 
 func TestGetWarehouseProductByProductIDAndWarehouseID(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 	productID := uuid.New()
 	warehouseID := uuid.New()
 	mockProduct := &entity.WarehouseProduct{
@@ -152,7 +152,7 @@ func TestGetWarehouseProductByProductIDAndWarehouseID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 
 			mockUC := new(mockWarehouseProductUsecase)
 			mockLogger := NewMockLogger(t)

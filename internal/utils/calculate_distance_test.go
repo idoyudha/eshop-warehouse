@@ -8,7 +8,7 @@ import (
 
 func TestCalculateZipCodeDistance(t *testing.T) {
 	// allow this function run in parallel with other test function
-	t.Parallel()
+	// t.Parallell()
 
 	tests := []struct {
 		name          string
@@ -68,7 +68,7 @@ func TestCalculateZipCodeDistance(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// test case will run in parallel
-			t.Parallel()
+			// t.Parallell()
 
 			distances, err := CalculateZipCodeDistance(tt.zipCode, tt.zipCodes)
 

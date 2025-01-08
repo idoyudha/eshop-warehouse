@@ -14,7 +14,7 @@ import (
 )
 
 func TestCognitoMiddleware(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 
 	mockUserID := uuid.New()
 

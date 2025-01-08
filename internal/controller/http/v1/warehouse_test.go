@@ -60,7 +60,7 @@ func (m *mockWarehouseUsecase) GetNearestWarehouse(ctx context.Context, zipCodes
 }
 
 func TestCreateWarehouse(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 
 	tests := []struct {
 		name         string
@@ -120,7 +120,7 @@ func TestCreateWarehouse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 			mockUC := new(mockWarehouseUsecase)
 			mockLogger := NewMockLogger(t)
 
@@ -165,7 +165,7 @@ func TestCreateWarehouse(t *testing.T) {
 }
 
 func TestGetWarehouseByID(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 
 	mockWarehouse := &entity.Warehouse{
 		ID:              uuid.New(),
@@ -224,7 +224,7 @@ func TestGetWarehouseByID(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 			mockUC := new(mockWarehouseUsecase)
 			mockLogger := NewMockLogger(t)
 
@@ -270,7 +270,7 @@ func TestGetWarehouseByID(t *testing.T) {
 }
 
 func TestGetAllWarehouses(t *testing.T) {
-	t.Parallel()
+	// t.Parallell()
 
 	mockWarehouses := []*entity.Warehouse{
 		{
@@ -354,7 +354,7 @@ func TestGetAllWarehouses(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+			// t.Parallell()
 			mockUC := new(mockWarehouseUsecase)
 			mockLogger := NewMockLogger(t)
 
