@@ -14,7 +14,7 @@ import (
 )
 
 func TestCognitoMiddleware(t *testing.T) {
-	gin.SetMode(gin.TestMode)
+	t.Parallel()
 
 	mockUserID := uuid.New()
 
@@ -81,7 +81,7 @@ func TestCognitoMiddleware(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // capture range variable
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			authConfig := config.AuthService{
 				BaseURL: mockServer.URL,

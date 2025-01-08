@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// Mock WarehouseProduct usecase
 type mockWarehouseProductUsecase struct {
 	mock.Mock
 }
@@ -76,8 +75,7 @@ func (m *mockWarehouseProductUsecase) GetNearestWarehouseZipCodeByProductID(ctx 
 }
 
 func TestGetWarehouseProductByProductIDAndWarehouseID(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-
+	t.Parallel()
 	productID := uuid.New()
 	warehouseID := uuid.New()
 	mockProduct := &entity.WarehouseProduct{
@@ -154,6 +152,8 @@ func TestGetWarehouseProductByProductIDAndWarehouseID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			mockUC := new(mockWarehouseProductUsecase)
 			mockLogger := NewMockLogger(t)
 

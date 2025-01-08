@@ -90,8 +90,6 @@ var _ usecase.TransactionProduct = (*mockTransactionProductUsecase)(nil)
 func TestCreateStockMovementIn(t *testing.T) {
 	t.Parallel()
 
-	gin.SetMode(gin.TestMode)
-
 	tests := []struct {
 		name           string
 		inputJSON      string
