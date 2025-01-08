@@ -69,11 +69,11 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 }
 
 type createStockMovementOut struct {
-	Items   []itemStockMovementOut `json:"items" binding:"required"`
+	Items   []ItemStockMovementOut `json:"items" binding:"required"`
 	ZipCode string                 `json:"zipcode" binding:"required"`
 }
 
-type itemStockMovementOut struct {
+type ItemStockMovementOut struct {
 	ProductID uuid.UUID `json:"product_id" binding:"required"`
 	Quantity  int64     `json:"quantity" binding:"required"`
 }
