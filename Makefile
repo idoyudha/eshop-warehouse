@@ -3,6 +3,6 @@ mock: ### run mockgen
 .PHONY: mock
 
 test: ### run test
-	@go test -race -coverprofile=coverage.out -coverpkg=./... ./internal/...
+	@go test -v -race -coverprofile=coverage.out -coverpkg=./... ./internal/...
 	@go tool cover -func=coverage.out
 .PHONY: test
