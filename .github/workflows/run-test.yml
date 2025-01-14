@@ -1,0 +1,32 @@
+name: Unit test
+
+on:
+  pull_request:
+    branches: [ development, master ]
+
+jobs:
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23.4'
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Run tests and get coverage
+      run: |
+        go test -v -race -coverprofile=coverage.out -coverpkg=./... ./internal/...
+        go tool cover -html=coverage.out -o coverage.html
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.html

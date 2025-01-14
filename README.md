@@ -8,7 +8,7 @@ This service handles user warehouse operations as usual create, read, update, an
 ```
 eshop-auth
 ├── .github/
-│   └── workflows/     # github workflows to automatically test, build, and push
+│   └── workflows/      # github workflows to automatically test, build, and push
 ├── cmd/
 │   └── app/            # configuration and log initialization
 ├── config/             # configuration
