@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/idoyudha/eshop-warehouse/config"
 )
 
 const (
@@ -20,11 +21,11 @@ type ConsumerServer struct {
 	Consumer *kafka.Consumer
 }
 
-func NewKafkaConsumer(brokerURL string) (*ConsumerServer, error) {
-	log.Printf("Creating Kafka consumer with broker URL: %s", brokerURL)
+func NewKafkaConsumer(kafkaCfg config.Kafka) (*ConsumerServer, error) {
+	log.Printf("Creating Kafka consumer with broker URL: %s", kafkaCfg.Broker)
 
 	config := &kafka.ConfigMap{
-		"bootstrap.servers":         brokerURL,
+		"bootstrap.servers":         kafkaCfg.Broker,
 		"group.id":                  ProductGroup,
 		"auto.offset.reset":         "earliest",
 		"session.timeout.ms":        45000,
@@ -40,7 +41,7 @@ func NewKafkaConsumer(brokerURL string) (*ConsumerServer, error) {
 	}
 
 	log.Printf("Kafka configuration: broker=%s, group=%s, auto.offset.reset=earliest",
-		brokerURL, ProductGroup)
+		kafkaCfg.Broker, ProductGroup)
 
 	c, err := kafka.NewConsumer(config)
 	if err != nil {
