@@ -9,7 +9,6 @@ type (
 		Log  `yaml:"log"`
 		PostgreSQL
 		AuthService
-		Redis
 		Kafka
 	}
 
@@ -35,13 +34,6 @@ type (
 
 	AuthService struct {
 		BaseURL string `env-required:"true" env:"AUTH_SERVICE"`
-	}
-
-	Redis struct {
-		// RedisURL           string `env-required:"true" env:"REDIS_URL"`
-		RedisMaster        string `env-required:"true" env:"REDIS_MASTER"`
-		RedisSentinelAddrs string `env-required:"true" env:"REDIS_SENTINEL_ADDRS"`
-		RedisPassword      string `env-required:"true" env:"REDIS_PASSWORD"`
 	}
 
 	Kafka struct {

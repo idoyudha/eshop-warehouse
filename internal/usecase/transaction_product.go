@@ -13,20 +13,17 @@ import (
 const productQuantityUpdated = "product-quantity-updated"
 
 type TransactionProductUseCase struct {
-	repoRedis              WarehouseRankRedisRepo
 	repoTransactionPostgre TransactionProductPostgresRepo
 	repoProductPostgre     WarehouseProductPostgreRepo
 	producer               *kafka.ProducerServer
 }
 
 func NewTransactionProductUseCase(
-	repoRedis WarehouseRankRedisRepo,
 	repoTransactionPostgre TransactionProductPostgresRepo,
 	repoProductPostgre WarehouseProductPostgreRepo,
 	producer *kafka.ProducerServer,
 ) *TransactionProductUseCase {
 	return &TransactionProductUseCase{
-		repoRedis,
 		repoTransactionPostgre,
 		repoProductPostgre,
 		producer,
