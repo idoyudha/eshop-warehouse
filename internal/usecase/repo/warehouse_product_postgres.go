@@ -2,7 +2,6 @@ package repo
 
 import (
 	"context"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
@@ -248,7 +247,6 @@ func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.C
 		return nil, errStmt
 	}
 	defer stmt.Close()
-	log.Printf("GetByProductIDAndWarehouseID productid => %s, warehouseid => %s", productID.String(), warehouseID.String())
 
 	var warehouseProduct entity.WarehouseProduct
 	err := stmt.QueryRowContext(ctx, productID, warehouseID).Scan(
