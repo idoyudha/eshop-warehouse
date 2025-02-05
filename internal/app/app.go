@@ -15,7 +15,6 @@ import (
 	"github.com/idoyudha/eshop-warehouse/pkg/kafka"
 	"github.com/idoyudha/eshop-warehouse/pkg/logger"
 	"github.com/idoyudha/eshop-warehouse/pkg/postgresql"
-	"github.com/idoyudha/eshop-warehouse/pkg/redis"
 )
 
 func Run(cfg *config.Config) {
@@ -38,13 +37,7 @@ func Run(cfg *config.Config) {
 		l.Fatal("app - Run - postgresql.NewPostgres: ", err)
 	}
 
-	redisClient, err := redis.NewRedis(cfg.Redis)
-	if err != nil {
-		l.Fatal("app - Run - redis.NewRedis: ", err)
-	}
-
 	warehouseUseCase := usecase.NewWarehouseUseCase(
-		repo.NewWarehouseRankRedisRepo(redisClient),
 		repo.NewWarehousePostgreRepo(postgreSQL),
 	)
 
@@ -57,7 +50,6 @@ func Run(cfg *config.Config) {
 	)
 
 	transactionProductUseCase := usecase.NewTransactionProductUseCase(
-		repo.NewWarehouseRankRedisRepo(redisClient),
 		repo.NewTransactionProductPostgreRepo(postgreSQL),
 		repo.NewWarehouseProductPostgreRepo(postgreSQL),
 		kafkaProducer,

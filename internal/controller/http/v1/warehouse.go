@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +56,7 @@ func (r *warehouseRoutes) createWarehouse(ctx *gin.Context) {
 
 	warehouse := createWarehouseRequestToWarehouseEntity(req)
 
-	err := r.uc.CreateWarehouse(ctx.Request.Context(), &warehouse)
+	err := r.uc.CreateWarehouse(context.Background(), &warehouse)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -99,7 +100,7 @@ func (r *warehouseRoutes) updateWarehouse(ctx *gin.Context) {
 
 	warehouse := updateWarehouseRequestToWarehouseEntity(req, warehouseID)
 
-	err = r.uc.UpdateWarehouse(ctx.Request.Context(), &warehouse)
+	err = r.uc.UpdateWarehouse(context.Background(), &warehouse)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - updateWarehouse")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -129,7 +130,7 @@ func (r *warehouseRoutes) getWarehouseByID(ctx *gin.Context) {
 		return
 	}
 
-	warehouse, err := r.uc.GetWarehouseByID(ctx.Request.Context(), warehouseID)
+	warehouse, err := r.uc.GetWarehouseByID(context.Background(), warehouseID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - getWarehouseByID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -142,7 +143,7 @@ func (r *warehouseRoutes) getWarehouseByID(ctx *gin.Context) {
 }
 
 func (r *warehouseRoutes) getAllWarehouses(ctx *gin.Context) {
-	warehouses, err := r.uc.GetAllWarehouses(ctx.Request.Context())
+	warehouses, err := r.uc.GetAllWarehouses(context.Background())
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - getAllWarehouses")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -170,7 +171,7 @@ func (r *warehouseRoutes) getNearestWarehouse(ctx *gin.Context) {
 		return
 	}
 
-	nearestWarehouse, err := r.uc.GetNearestWarehouse(ctx.Request.Context(), req.ZipCodes)
+	nearestWarehouse, err := r.uc.GetNearestWarehouse(context.Background(), req.ZipCodes)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseRoutes - createWarehouse")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))

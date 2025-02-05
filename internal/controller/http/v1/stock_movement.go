@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,7 @@ func (r *stockMovementRoutes) createStockMovementIn(ctx *gin.Context) {
 
 	stockMovement := createStockMovementInRequestToStockMovementEntity(req)
 
-	err := r.uct.MoveIn(ctx.Request.Context(), &stockMovement)
+	err := r.uct.MoveIn(context.Background(), &stockMovement)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementIn")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -94,7 +95,7 @@ func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
 	}
 
 	stockMovements := createStockMovementOutRequestToStockMovementEntity(req, userID.(uuid.UUID))
-	err := r.uct.MoveOut(ctx.Request.Context(), stockMovements, req.ZipCode)
+	err := r.uct.MoveOut(context.Background(), stockMovements, req.ZipCode)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - createStockMovementOut")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -105,7 +106,7 @@ func (r *stockMovementRoutes) createStockMovementOut(ctx *gin.Context) {
 }
 
 func (r *stockMovementRoutes) getAllStockMovements(ctx *gin.Context) {
-	stockMovements, err := r.ucs.GetAllStockMovements(ctx.Request.Context())
+	stockMovements, err := r.ucs.GetAllStockMovements(context.Background())
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getAllStockMovements")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -123,7 +124,7 @@ func (r *stockMovementRoutes) getStockMovementByProductID(ctx *gin.Context) {
 		return
 	}
 
-	stockMovements, err := r.ucs.GetStockMovementsByProductID(ctx.Request.Context(), productID)
+	stockMovements, err := r.ucs.GetStockMovementsByProductID(context.Background(), productID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementByProductID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -141,7 +142,7 @@ func (r *stockMovementRoutes) getStockMovementBySourceID(ctx *gin.Context) {
 		return
 	}
 
-	stockMovements, err := r.ucs.GetStockMovementsBySourceID(ctx.Request.Context(), sourceID)
+	stockMovements, err := r.ucs.GetStockMovementsBySourceID(context.Background(), sourceID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementBySourceID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -159,7 +160,7 @@ func (r *stockMovementRoutes) getStockMovementByDestinationID(ctx *gin.Context) 
 		return
 	}
 
-	stockMovements, err := r.ucs.GetStockMovementsByDestinationID(ctx.Request.Context(), destinationID)
+	stockMovements, err := r.ucs.GetStockMovementsByDestinationID(context.Background(), destinationID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - stockMovementRoutes - getStockMovementByDestinationID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))

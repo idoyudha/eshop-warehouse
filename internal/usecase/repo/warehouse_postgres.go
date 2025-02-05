@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
@@ -26,7 +27,7 @@ const queryInsertWarehouse = `
 func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Warehouse) error {
 	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouse)
 	if errStmt != nil {
-		return errStmt
+		return fmt.Errorf("failed to prepare statement: %w", errStmt)
 	}
 	defer stmt.Close()
 
@@ -42,7 +43,7 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 		warehouse.UpdatedAt,
 	)
 	if saveErr != nil {
-		return saveErr
+		return fmt.Errorf("failed to save warehouse: %w", saveErr)
 	}
 
 	return nil

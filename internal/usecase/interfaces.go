@@ -8,10 +8,6 @@ import (
 )
 
 type (
-	WarehouseRankRedisRepo interface {
-		UpdateWarehouseRanks(context.Context, string, string, map[string]float64) error
-		GetNearestWarehouses(context.Context, string) ([]entity.WarehouseDistance, error)
-	}
 	WarehousePostgreRepo interface {
 		Save(context.Context, *entity.Warehouse) error
 		Update(context.Context, *entity.Warehouse) error
