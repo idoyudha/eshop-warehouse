@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,7 @@ func newWarehouseProductRoutes(
 }
 
 func (r *warehouseProductRoutes) getAllWarehouseProducts(ctx *gin.Context) {
-	products, err := r.uc.GetAllWarehouseProducts(ctx.Request.Context())
+	products, err := r.uc.GetAllWarehouseProducts(context.Background())
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseProductRoutes - getAllWarehouseProducts")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -51,7 +52,7 @@ func (r *warehouseProductRoutes) getWarehouseProductByProductID(ctx *gin.Context
 		return
 	}
 
-	products, err := r.uc.GetWarehouseProductByProductID(ctx.Request.Context(), productID)
+	products, err := r.uc.GetWarehouseProductByProductID(context.Background(), productID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -69,7 +70,7 @@ func (r *warehouseProductRoutes) getWarehouseProductByWarehouseID(ctx *gin.Conte
 		return
 	}
 
-	products, err := r.uc.GetWarehouseProductByWarehouseID(ctx.Request.Context(), warehouseID)
+	products, err := r.uc.GetWarehouseProductByWarehouseID(context.Background(), warehouseID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByWarehouseID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -94,7 +95,7 @@ func (r *warehouseProductRoutes) getWarehouseProductByProductIDAndWarehouseID(ct
 		return
 	}
 
-	products, err := r.uc.GetWarehouseProductByProductIDAndWarehouseID(ctx.Request.Context(), productID, warehouseID)
+	products, err := r.uc.GetWarehouseProductByProductIDAndWarehouseID(context.Background(), productID, warehouseID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseProductRoutes - getWarehouseProductByProductIDAndWarehouseID")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))
@@ -121,7 +122,7 @@ func (r *warehouseProductRoutes) getNearestWarehouseZipCode(ctx *gin.Context) {
 		return
 	}
 
-	warehouse, err := r.uc.GetNearestWarehouseZipCodeByProductID(ctx.Request.Context(), req.ZipCode, req.ProductID)
+	warehouse, err := r.uc.GetNearestWarehouseZipCodeByProductID(context.Background(), req.ZipCode, req.ProductID)
 	if err != nil {
 		r.l.Error(err, "http - v1 - warehouseProductRoutes - getNearestWarehouseZipCode")
 		ctx.JSON(http.StatusInternalServerError, newInternalServerError(err.Error()))

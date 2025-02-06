@@ -44,22 +44,21 @@ type TestWarehouse struct {
 	err  error
 }
 
-func warehouse(t *testing.T) (*usecase.WarehouseUseCase, *MockWarehouseRankRedisRepo, *MockWarehousePostgreRepo) {
+func warehouse(t *testing.T) (*usecase.WarehouseUseCase, *MockWarehousePostgreRepo) {
 	t.Helper()
 
 	mockCtl := gomock.NewController(t)
 	defer mockCtl.Finish()
 
-	repoRedis := NewMockWarehouseRankRedisRepo(mockCtl)
 	repoPostgre := NewMockWarehousePostgreRepo(mockCtl)
-	warehouse := usecase.NewWarehouseUseCase(repoRedis, repoPostgre)
+	warehouse := usecase.NewWarehouseUseCase(repoPostgre)
 
-	return warehouse, repoRedis, repoPostgre
+	return warehouse, repoPostgre
 }
 
 func TestGetAllWarehouses(t *testing.T) {
 	// t.Parallell()
-	warehouse, _, repoPostgre := warehouse(t)
+	warehouse, repoPostgre := warehouse(t)
 
 	tests := []TestWarehouse{
 		{
@@ -106,7 +105,7 @@ func TestGetAllWarehouses(t *testing.T) {
 
 func TestGetWarehouseByID(t *testing.T) {
 	// t.Parallell()
-	warehouse, _, repoPostgre := warehouse(t)
+	warehouse, repoPostgre := warehouse(t)
 
 	tests := []TestWarehouse{
 		{
