@@ -12,28 +12,22 @@ type StockMovementPostgreRepo struct {
 	*postgresql.Postgres
 }
 
-func NewStockMovementPostgreRepo(client *postgresql.Postgres) *StockMovementPostgreRepo {
+func NewStockMovementPostgreRepo(pg *postgresql.Postgres) *StockMovementPostgreRepo {
 	return &StockMovementPostgreRepo{
-		client,
+		pg,
 	}
 }
 
 const queryGetAllStockMovements = `SELECT * FROM stock_movements;`
 
 func (r *StockMovementPostgreRepo) GetAll(ctx context.Context) ([]*entity.StockMovement, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllStockMovements)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var stockMovements []*entity.StockMovement
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := r.Pool.Query(ctx, queryGetAllStockMovements)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	rows.Close()
 
+	var stockMovements []*entity.StockMovement
 	for rows.Next() {
 		var stockMovement entity.StockMovement
 		if err := rows.Scan(
@@ -57,19 +51,13 @@ func (r *StockMovementPostgreRepo) GetAll(ctx context.Context) ([]*entity.StockM
 const queryGetByProductID = `SELECT * FROM stock_movements WHERE product_id = $1;`
 
 func (r *StockMovementPostgreRepo) GetByProductID(ctx context.Context, productID uuid.UUID) ([]*entity.StockMovement, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetByProductID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var stockMovements []*entity.StockMovement
-	rows, err := stmt.QueryContext(ctx, productID)
+	rows, err := r.Pool.Query(ctx, queryGetByProductID, productID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	rows.Close()
 
+	var stockMovements []*entity.StockMovement
 	for rows.Next() {
 		var stockMovement entity.StockMovement
 		if err := rows.Scan(
@@ -93,19 +81,13 @@ func (r *StockMovementPostgreRepo) GetByProductID(ctx context.Context, productID
 const queryGetBySourceID = `SELECT * FROM stock_movements WHERE from_warehouse_id = $1;`
 
 func (r *StockMovementPostgreRepo) GetBySourceID(ctx context.Context, sourceID uuid.UUID) ([]*entity.StockMovement, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetBySourceID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var stockMovements []*entity.StockMovement
-	rows, err := stmt.QueryContext(ctx, sourceID)
+	rows, err := r.Pool.Query(ctx, queryGetBySourceID, sourceID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	rows.Close()
 
+	var stockMovements []*entity.StockMovement
 	for rows.Next() {
 		var stockMovement entity.StockMovement
 		if err := rows.Scan(
@@ -129,19 +111,13 @@ func (r *StockMovementPostgreRepo) GetBySourceID(ctx context.Context, sourceID u
 const queryGetByDestinationID = `SELECT * FROM stock_movements WHERE to_warehouse_id = $1;`
 
 func (r *StockMovementPostgreRepo) GetByDestinationID(ctx context.Context, destinationID uuid.UUID) ([]*entity.StockMovement, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetByDestinationID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var stockMovements []*entity.StockMovement
-	rows, err := stmt.QueryContext(ctx, destinationID)
+	rows, err := r.Pool.Query(ctx, queryGetByDestinationID, destinationID)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	rows.Close()
 
+	var stockMovements []*entity.StockMovement
 	for rows.Next() {
 		var stockMovement entity.StockMovement
 		if err := rows.Scan(

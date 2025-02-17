@@ -36,6 +36,7 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		l.Fatal("app - Run - postgresql.NewPostgres: ", err)
 	}
+	defer postgreSQL.Close()
 
 	warehouseUseCase := usecase.NewWarehouseUseCase(
 		repo.NewWarehousePostgreRepo(postgreSQL),

@@ -25,7 +25,8 @@ type (
 		URL         string `env-required:"true" env:"POSTGRESQL_URL"`
 		ConnTimeout int    `env-required:"true" env:"POSTGRESQL_CONN_TIMEOUT"`
 		ConnAttemps int    `env-required:"true" env:"POSTGRESQL_CONN_ATTEMPS"`
-		MaxPoolSize int    `env-required:"true" env:"POSTGRESQL_MAX_POOL_SIZE"`
+		MaxConnSize int    `env-required:"true" env:"POSTGRESQL_MAX_CONN_SIZE"`
+		MinConnSize int    `env-required:"true" env:"POSTGRESQL_MIN_CONN_SIZE"`
 	}
 
 	Log struct {

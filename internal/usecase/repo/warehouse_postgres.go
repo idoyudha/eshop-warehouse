@@ -13,9 +13,9 @@ type WarehousePostgreRepo struct {
 	*postgresql.Postgres
 }
 
-func NewWarehousePostgreRepo(client *postgresql.Postgres) *WarehousePostgreRepo {
+func NewWarehousePostgreRepo(pg *postgresql.Postgres) *WarehousePostgreRepo {
 	return &WarehousePostgreRepo{
-		client,
+		pg,
 	}
 }
 
@@ -25,13 +25,8 @@ const queryInsertWarehouse = `
 `
 
 func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Warehouse) error {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouse)
-	if errStmt != nil {
-		return fmt.Errorf("failed to prepare statement: %w", errStmt)
-	}
-	defer stmt.Close()
-
-	_, saveErr := stmt.ExecContext(ctx,
+	_, saveErr := r.Pool.Exec(ctx,
+		queryInsertWarehouse,
 		warehouse.ID,
 		warehouse.Name,
 		warehouse.Street,
@@ -52,13 +47,8 @@ func (r *WarehousePostgreRepo) Save(ctx context.Context, warehouse *entity.Wareh
 const queryUpdateWarehouse = `UPDATE warehouses SET name = $1, street = $2, updated_at = $3 WHERE id = $4;`
 
 func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.Warehouse) error {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateWarehouse)
-	if errStmt != nil {
-		return errStmt
-	}
-	defer stmt.Close()
-
-	_, updateErr := stmt.ExecContext(ctx, warehouse.Name, warehouse.Street, warehouse.UpdatedAt, warehouse.ID)
+	_, updateErr := r.Pool.Exec(ctx, queryUpdateWarehouse,
+		warehouse.Name, warehouse.Street, warehouse.UpdatedAt, warehouse.ID)
 	if updateErr != nil {
 		return updateErr
 	}
@@ -69,14 +59,8 @@ func (r *WarehousePostgreRepo) Update(ctx context.Context, warehouse *entity.War
 const queryGetByID = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE id = $1 AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*entity.Warehouse, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetByID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
 	var warehouse entity.Warehouse
-	err := stmt.QueryRowContext(ctx, id).Scan(
+	err := r.Pool.QueryRow(ctx, queryGetByID, id).Scan(
 		&warehouse.ID,
 		&warehouse.Name,
 		&warehouse.Street,
@@ -97,14 +81,8 @@ func (r *WarehousePostgreRepo) GetByID(ctx context.Context, id uuid.UUID) (*enti
 const queryGetAllWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouse)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
 	var warehouses []*entity.Warehouse
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := r.Pool.Query(ctx, queryGetAllWarehouse)
 	if err != nil {
 		return nil, err
 	}
@@ -135,14 +113,8 @@ func (r *WarehousePostgreRepo) GetAll(ctx context.Context) ([]*entity.Warehouse,
 const queryGetAllExceptMainWarehouse = `SELECT id, name, street, city, state, zip_code, is_main_warehouse, created_at, updated_at FROM warehouses WHERE is_main_warehouse = false AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.Warehouse, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllExceptMainWarehouse)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
 	var warehouses []*entity.Warehouse
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := r.Pool.Query(ctx, queryGetAllExceptMainWarehouse)
 	if err != nil {
 		return nil, err
 	}
@@ -173,14 +145,8 @@ func (r *WarehousePostgreRepo) GetAllExceptMain(ctx context.Context) ([]*entity.
 const queryGetMainIDWarehouse = `SELECT id FROM warehouses WHERE is_main_warehouse = true AND deleted_at IS NULL;`
 
 func (r *WarehousePostgreRepo) GetMainID(ctx context.Context) (uuid.UUID, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetMainIDWarehouse)
-	if errStmt != nil {
-		return uuid.Nil, errStmt
-	}
-	defer stmt.Close()
-
 	var id uuid.UUID
-	err := stmt.QueryRowContext(ctx).Scan(&id)
+	err := r.Pool.QueryRow(ctx, queryGetMainIDWarehouse).Scan(&id)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -191,14 +157,8 @@ func (r *WarehousePostgreRepo) GetMainID(ctx context.Context) (uuid.UUID, error)
 const queryGetAllWarehouseIDAndZipCode = `SELECT id, zip_code FROM warehouses WHERE deleted_at IS NULL ORDER BY zip_code ASC;`
 
 func (r *WarehousePostgreRepo) GetAllIDAndZipCode(ctx context.Context) ([]*entity.Warehouse, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouseIDAndZipCode)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
 	var warehouses []*entity.Warehouse
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := r.Pool.Query(ctx, queryGetAllWarehouseIDAndZipCode)
 	if err != nil {
 		return nil, err
 	}

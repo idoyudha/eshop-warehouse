@@ -8,15 +8,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/idoyudha/eshop-warehouse/internal/entity"
 	"github.com/idoyudha/eshop-warehouse/pkg/postgresql"
+	"github.com/jackc/pgx/v5"
 )
 
 type TransactionProductPostgresRepo struct {
 	*postgresql.Postgres
 }
 
-func NewTransactionProductPostgreRepo(client *postgresql.Postgres) *TransactionProductPostgresRepo {
+func NewTransactionProductPostgreRepo(pg *postgresql.Postgres) *TransactionProductPostgresRepo {
 	return &TransactionProductPostgresRepo{
-		client,
+		pg,
 	}
 }
 
@@ -86,17 +87,17 @@ const (
 // handling transfer from warehouse to warehouse
 func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMovement *entity.StockMovement) error {
 	// begin transaction
-	tx, err := r.Conn.BeginTx(ctx, &sql.TxOptions{
-		Isolation: sql.LevelReadCommitted,
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.TxIsoLevel(sql.LevelReadCommitted.String()),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer tx.Rollback(ctx)
 
 	// 1. lock source product row if exists
 	var whSrcProduct entity.WarehouseProduct
-	if err = tx.QueryRowContext(ctx, queryLockSourceProduct,
+	if err = tx.QueryRow(ctx, queryLockSourceProduct,
 		stockMovement.ProductID, stockMovement.FromWarehouseID,
 	).Scan(
 		&whSrcProduct.ID,
@@ -113,7 +114,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	// 2. lock destination product row if exists
 	var destExist bool
 	var whDestProductID uuid.UUID
-	err = tx.QueryRowContext(ctx, queryLockDestProduct,
+	err = tx.QueryRow(ctx, queryLockDestProduct,
 		stockMovement.ProductID, stockMovement.ToWarehouseID,
 	).Scan(&whDestProductID)
 	destExist = err != sql.ErrNoRows
@@ -122,24 +123,20 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	}
 
 	// 3. update source quantity
-	res, err := tx.ExecContext(ctx, queryUpdateSourceQuantity,
+	res, err := tx.Exec(ctx, queryUpdateSourceQuantity,
 		stockMovement.Quantity, stockMovement.CreatedAt, stockMovement.ProductID, stockMovement.FromWarehouseID)
 	if err != nil {
 		return fmt.Errorf("failed to update source quantity: %w", err)
 	}
 
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
-	}
-	if rowsAffected == 0 {
+	if res.RowsAffected() == 0 {
 		return fmt.Errorf("source product not found")
 	}
 
 	// 4. handle destination product
 	if destExist {
 		// update destination quantity
-		_, err = tx.ExecContext(ctx, queryUpdateDestQuantity,
+		_, err = tx.Exec(ctx, queryUpdateDestQuantity,
 			stockMovement.Quantity, stockMovement.CreatedAt, stockMovement.ProductID, stockMovement.ToWarehouseID)
 		if err != nil {
 			return fmt.Errorf("failed to update destination quantity: %w", err)
@@ -150,7 +147,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 		if err != nil {
 			return fmt.Errorf("failed to generate uuid: %w", err)
 		}
-		_, err = tx.ExecContext(ctx, queryInsertDestProduct,
+		_, err = tx.Exec(ctx, queryInsertDestProduct,
 			newID,
 			stockMovement.ToWarehouseID,
 			stockMovement.ProductID,
@@ -170,7 +167,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	}
 
 	// 5. insert stock movement
-	_, err = tx.ExecContext(ctx, queryInsertWarehouseMovement,
+	_, err = tx.Exec(ctx, queryInsertWarehouseMovement,
 		stockMovement.ID,
 		stockMovement.ProductID,
 		stockMovement.ProductName,
@@ -184,7 +181,7 @@ func (r *TransactionProductPostgresRepo) TransferIn(ctx context.Context, stockMo
 	}
 
 	// commit transaction
-	if errCommit := tx.Commit(); errCommit != nil {
+	if errCommit := tx.Commit(ctx); errCommit != nil {
 		return fmt.Errorf("failed to commit transaction: %w", errCommit)
 	}
 
@@ -207,18 +204,18 @@ const queryInsertUserMovement = `
 // it will be multiple stock movement transactions
 func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockMovement []*entity.StockMovement) error {
 	// begin transaction
-	tx, err := r.Conn.BeginTx(ctx, &sql.TxOptions{
-		Isolation: sql.LevelReadCommitted,
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{
+		IsoLevel: pgx.TxIsoLevel(sql.LevelReadCommitted.String()),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer tx.Rollback(ctx)
 
 	for _, movement := range stockMovement {
 		// 1. lock source product row
 		var whSrcProduct entity.WarehouseProduct
-		if err = tx.QueryRowContext(ctx, queryLockSourceProduct,
+		if err = tx.QueryRow(ctx, queryLockSourceProduct,
 			movement.ProductID, movement.FromWarehouseID,
 		).Scan(
 			&whSrcProduct.ID,
@@ -233,14 +230,14 @@ func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockM
 		}
 
 		// 2. update source quantity
-		_, err = tx.ExecContext(ctx, queryUpdateSourceQuantity,
+		_, err = tx.Exec(ctx, queryUpdateSourceQuantity,
 			movement.Quantity, movement.CreatedAt, movement.ProductID, movement.FromWarehouseID)
 		if err != nil {
 			return fmt.Errorf("failed to update source quantity: %w", err)
 		}
 
 		// 3. insert stock movement
-		_, err = tx.ExecContext(ctx, queryInsertUserMovement,
+		_, err = tx.Exec(ctx, queryInsertUserMovement,
 			movement.ID,
 			movement.ProductID,
 			movement.ProductName,
@@ -255,7 +252,7 @@ func (r *TransactionProductPostgresRepo) TransferOut(ctx context.Context, stockM
 	}
 
 	// commit transaction
-	if errCommit := tx.Commit(); errCommit != nil {
+	if errCommit := tx.Commit(ctx); errCommit != nil {
 		return fmt.Errorf("failed to commit transaction: %w", errCommit)
 	}
 

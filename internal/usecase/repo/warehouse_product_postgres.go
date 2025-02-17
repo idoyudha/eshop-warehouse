@@ -12,9 +12,9 @@ type WarehouseProductPostgreRepo struct {
 	*postgresql.Postgres
 }
 
-func NewWarehouseProductPostgreRepo(client *postgresql.Postgres) *WarehouseProductPostgreRepo {
+func NewWarehouseProductPostgreRepo(pg *postgresql.Postgres) *WarehouseProductPostgreRepo {
 	return &WarehouseProductPostgreRepo{
-		client,
+		pg,
 	}
 }
 
@@ -24,13 +24,7 @@ const queryInsertWarehouseProduct = `
 `
 
 func (r *WarehouseProductPostgreRepo) Save(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryInsertWarehouseProduct)
-	if errStmt != nil {
-		return errStmt
-	}
-	defer stmt.Close()
-
-	_, saveErr := stmt.ExecContext(ctx,
+	_, saveErr := r.Pool.Exec(ctx, queryInsertWarehouseProduct,
 		warehouseProduct.ID,
 		warehouseProduct.WarehouseID,
 		warehouseProduct.ProductID,
@@ -58,13 +52,7 @@ const queryUpdateNameAndPrice = `
 `
 
 func (r *WarehouseProductPostgreRepo) Update(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateNameAndPrice)
-	if errStmt != nil {
-		return errStmt
-	}
-	defer stmt.Close()
-
-	_, updateErr := stmt.ExecContext(ctx,
+	_, updateErr := r.Pool.Exec(ctx, queryUpdateNameAndPrice,
 		warehouseProduct.ProductName,
 		warehouseProduct.ProductImageURL,
 		warehouseProduct.ProductDescription,
@@ -83,13 +71,8 @@ func (r *WarehouseProductPostgreRepo) Update(ctx context.Context, warehouseProdu
 const queryUpdateProductQuantity = `UPDATE warehouse_products SET product_quantity = $1, updated_at = $2 WHERE product_id = $3;`
 
 func (r *WarehouseProductPostgreRepo) UpdateProductQuantity(ctx context.Context, warehouseProduct *entity.WarehouseProduct) error {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryUpdateProductQuantity)
-	if errStmt != nil {
-		return errStmt
-	}
-	defer stmt.Close()
-
-	_, updateErr := stmt.ExecContext(ctx, warehouseProduct.ProductQuantity, warehouseProduct.UpdatedAt, warehouseProduct.ProductID)
+	_, updateErr := r.Pool.Exec(ctx, queryUpdateProductQuantity,
+		warehouseProduct.ProductQuantity, warehouseProduct.UpdatedAt, warehouseProduct.ProductID)
 	if updateErr != nil {
 		return updateErr
 	}
@@ -104,19 +87,13 @@ const queryGetAllWarehouseProducts = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetAll(ctx context.Context) ([]*entity.WarehouseProduct, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetAllWarehouseProducts)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var warehouseProducts []*entity.WarehouseProduct
-	rows, err := stmt.QueryContext(ctx)
+	rows, err := r.Pool.Query(ctx, queryGetAllWarehouseProducts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var warehouseProducts []*entity.WarehouseProduct
 	for rows.Next() {
 		var warehouseProduct entity.WarehouseProduct
 		err := rows.Scan(
@@ -150,19 +127,13 @@ const queryGetWarehouseProductByProductID = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetByProductID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var warehouseProducts []*entity.WarehouseProduct
-	rows, err := stmt.QueryContext(ctx, id)
+	rows, err := r.Pool.Query(ctx, queryGetWarehouseProductByProductID, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var warehouseProducts []*entity.WarehouseProduct
 	for rows.Next() {
 		var warehouseProduct entity.WarehouseProduct
 		err := rows.Scan(
@@ -196,19 +167,13 @@ const queryGetWarehouseProductByWarehouseID = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetByWarehouseID(ctx context.Context, id uuid.UUID) ([]*entity.WarehouseProduct, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByWarehouseID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var warehouseProducts []*entity.WarehouseProduct
-	rows, err := stmt.QueryContext(ctx, id)
+	rows, err := r.Pool.Query(ctx, queryGetWarehouseProductByWarehouseID, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var warehouseProducts []*entity.WarehouseProduct
 	for rows.Next() {
 		var warehouseProduct entity.WarehouseProduct
 		err := rows.Scan(
@@ -242,14 +207,8 @@ const queryGetWarehouseProductByProductIDAndWarehouseID = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetByProductIDAndWarehouseID(ctx context.Context, productID uuid.UUID, warehouseID uuid.UUID) (*entity.WarehouseProduct, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseProductByProductIDAndWarehouseID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
 	var warehouseProduct entity.WarehouseProduct
-	err := stmt.QueryRowContext(ctx, productID, warehouseID).Scan(
+	err := r.Pool.QueryRow(ctx, queryGetWarehouseProductByProductIDAndWarehouseID, productID, warehouseID).Scan(
 		&warehouseProduct.ID,
 		&warehouseProduct.WarehouseID,
 		&warehouseProduct.ProductID,
@@ -280,19 +239,13 @@ const queryGetWarehouseIDAndZipCodeByProductID = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetWarehouseIDZipCodeAndQtyByProductID(ctx context.Context, productID uuid.UUID) ([]*entity.WarehouseAddressAndProductQty, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetWarehouseIDAndZipCodeByProductID)
-	if errStmt != nil {
-		return nil, errStmt
-	}
-	defer stmt.Close()
-
-	var warehouseAndProducts []*entity.WarehouseAddressAndProductQty
-	rows, err := stmt.QueryContext(ctx, productID)
+	rows, err := r.Pool.Query(ctx, queryGetWarehouseIDAndZipCodeByProductID, productID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	var warehouseAndProducts []*entity.WarehouseAddressAndProductQty
 	for rows.Next() {
 		var warehouseAndProduct entity.WarehouseAddressAndProductQty
 		err := rows.Scan(
@@ -315,14 +268,8 @@ const queryGetTotalQuantityOfProductInAllWarehouse = `
 `
 
 func (r *WarehouseProductPostgreRepo) GetTotalQuantityOfProductInAllWarehouse(ctx context.Context, productID uuid.UUID) (int, error) {
-	stmt, errStmt := r.Conn.PrepareContext(ctx, queryGetTotalQuantityOfProductInAllWarehouse)
-	if errStmt != nil {
-		return 0, errStmt
-	}
-	defer stmt.Close()
-
 	var totalQuantity int
-	err := stmt.QueryRowContext(ctx, productID).Scan(&totalQuantity)
+	err := r.Pool.QueryRow(ctx, queryGetTotalQuantityOfProductInAllWarehouse, productID).Scan(&totalQuantity)
 	if err != nil {
 		return 0, err
 	}
